@@ -1,3 +1,18 @@
+#' Find targeted compounds in LC-MS data
+#'
+#' @param path_data_in path to the .mzML or .mzXML files
+#' @param msRawData_samples output of selectSpectra
+#' @param msRawData_QC output of selectSpectra
+#' @param QC_list list indicating the QC files for each batch
+#' @param batch_list list indicating the different batches
+#' @param ppm Allowed mass deviation in ppm
+#' @param deltaTR Allowed RT deviation in the search window
+#' @param dbData Output of loadTargetedDatabase
+#'
+#' @return Returns intensities/areas for found targeted compounds.
+#' @export
+#'
+#' @examples
 FindTargetedCompounds <- function(path_data_in,msRawData_samples,msRawData_QC,QC_list,batch_list,ppm,deltaTR,dbData){
   
   
@@ -148,58 +163,7 @@ FindTargetedCompounds <- function(path_data_in,msRawData_samples,msRawData_QC,QC
       
       
       
-      #Extraction using centwave
-      
-      xcmsje <- filterFile(xcms_raw_data, file = datafiles[p])
-      xcmsje <- xcms_raw_data
-      
-      for(i in 1:dim(rtRanges)[1]){
-        
-        
-        raw_data_filt <- filterRt(xcmsje,rt = rtRanges[i,])
-        raw_data_filt <- filterMz(raw_data_filt, mz = mzRanges[i,])
-        chrom <- chromatogram(raw_data_filt)
-        
-        if(anyNA(intensity(chrom[1,1])) == T){
-          int <-  intensity(chrom[1,1])[-which(is.na(intensity(chrom[1,1])))]
-          rt <- rtime(chrom[1,1])[-which(is.na(intensity(chrom[1,1])))]
-        } else{
-          int <-  intensity(chrom[1,1])
-          rt <- rtime(chrom[1,1])
-        }
-        
-        int <- intensity(chrom[1,1])
-        rt <- rtime(chrom[1,1])
-        
-        
-        # proline_c_cent <- xcmsje %>%
-        #   filterRt(rtRanges[i,]) %>%
-        #    combineSpectraMovingWindow() %>%
-        # 
-        #   filterMz(mzRanges[i,])
-        
-        noise <- xcms:::estimateChromNoise(int, trim = 0.05,
-                                           minPts = 3 )
-        
-        pks <- peaksWithCentWave(int,rt,peakwidth = c(2,50),snthresh = 0, firstBaselineCheck = F, fitgauss = T, noise = noise  , integrate = 1 ,prefilter= c(1,noise),extendLengthMSW = T)
-        
-        
-        
-        
-        if(nrow(pks)>1){
-          rt_database = dbData$tr[i]
-          distance <- as.matrix(dist(c(rt_database,pks[,1])))[,1]
-          distance <- distance[distance!=0]
-          min <- which.min(as.vector(distance))
-          pks <- pks[min,]
-        }
-        
-        plot(rt,int, type = "l") 
-        rect(xleft = pks[, "rtmin"], xright = pks[, "rtmax"],
-             ybottom = rep(0, nrow(pks)), ytop = pks[, "maxo"], col = "#ff000040",
-             border = "#00000040")
-        
-      }
+
       
     }
     
@@ -299,7 +263,7 @@ FindTargetedCompounds <- function(path_data_in,msRawData_samples,msRawData_QC,QC
         xlab('RT (min)') +
         scale_x_continuous(breaks = round(seq(min(plotdata2$rt), max(plotdata2$rt), by = 0.5),1)) +
         theme_light() +
-        geom_vline(xintercept = targExtracRes_QC$tr[componentID]/60, linetype = "dotted", size = 1, col = "red") +
+        geom_vline(xintercept = targExtracRes_QC$tr[componentID]/60, linetype = "dotted", size = 1, col = "red") 
         
         
         

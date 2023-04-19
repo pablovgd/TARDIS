@@ -3,7 +3,7 @@
 #'
 #' Loads a .xlsx or .csv database files that contains all the information needed to detect targeted compounds.
 #'
-#' @param path_to_file Full path to the file containing the database with targeted compounds
+#' @param path_to_file Full path to the file containing the database with targeted compounds. Polarity op ions needs to be indicated in the format: "[M+ION]+" or "[M-ION]-"  
 #' @param polarity Indicates the polarity, can be either "negative" or "positive"
 #' @param columnNames Column names of the columns with information that need to be included, can be as many as needed, but needs to include "ID","Name","m/z-value" and "RT (min)"
 #'
@@ -15,10 +15,10 @@
 loadTargetedDatabase <- function(path_to_file,polarity,columnNames){
 
   if(grepl(".xlsx",path_to_file) == T){
-    masslist <- read_excel(path)  
+    masslist <- read_excel(path_to_file)  
   }
   else if(grepl(".csv",path_to_file) == T ){
-    masslist <- read.csv(path)
+    masslist <- read.csv(path_to_file)
   }
   else {
     stop("The database input format should be .csv, .txt or .xlsx")
@@ -54,6 +54,6 @@ loadTargetedDatabase <- function(path_to_file,polarity,columnNames){
     dbData <- masslist_negative
   }
   
-  
+  return(dbData)
   
 }
