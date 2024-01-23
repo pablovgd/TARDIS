@@ -56,9 +56,9 @@ Enter the correct inputs and run the block
 
 ```{r, echo=T, results="hide",tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 #Path data in is the location were your converted .mzxml or .mzml files are stored. 
-path_data_in <- "T:/shares/di04_limet_bioinformatics/PhD Pablo/Scripts/TaPEx/Tutorial_example/Example_files" 
+path_data_in <- "K:/shares/di04_limet_bioinformatics/PhD Pablo/Tapex_test_STD_Environage/pos/" 
 #here you should enter the path to your spreadsheet (.xlsx) with targeted compounds
-masslist <- read_excel("T:/shares/di04_limet_bioinformatics/PhD Pablo/Publicaties/WIP/Gut_Phenotyping/Database/Database_fecal_metabolomics.xlsx")
+masslist <- read_excel("K:/shares/di04_limet_bioinformatics/PhD Pablo/Tapex_test_STD_Environage/targlijst.xlsx")
 polarity <- "positive" #you can change the polarity here, needs to be "positive" or "negative"
 mode <- "metabolomics" #you can change the mode here, needs to be "lipidomics" or "metabolomics"
 #With these two parameters, you can set the allowed errors for mass & retention time!
@@ -159,7 +159,7 @@ datafiles <- list.files(path = path_data_in, pattern = ".mzML|.mzXML", recursive
 
 #Choose your patterns here!
 msRawData_samples <-  datafiles[grep(pattern = "my_analysis",datafiles)]
-msRawData_QC <-  datafiles[grep(pattern = "QC",datafiles)]
+msRawData_QC <-  datafiles[grep(pattern = "STD",datafiles)]
 
 msRawData_QC
 
@@ -173,9 +173,9 @@ You can adjust this in this block and run it!
 
 ```{r, echo=T, results="hide", eval=F,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 #Here the QC's for day1 have index 1 and 2, the QC's for day two have index 3 & 4
-QC_list <- list(c(1,2))# you can add more days!
+QC_list <- list(c(1:20))# you can add more days!
 # The indexes for the runs on day 1 go from 1 to 4 and from 5 to 8 for day 2!
-batch_list <- list(c(1)) #Indicate sample files per batch
+batch_list <- list(c(1:4),c(5:8)) #Indicate sample files per batch
 
 ```
 
@@ -218,11 +218,7 @@ msRawData_QCs <- getXcmsRaw(xcmsset,sampleidx = seq(1,length(files),1))
 
 
 
-#Create raw data object for centwave
 
-setwd(path_data_in)
-xcms_raw_data <- readMSData(files = datafiles,
-                       mode = "onDisk", msLevel. = 1, centroided. = T)
 
 
 mergedata_list_QC <- list()
@@ -382,10 +378,10 @@ for(p in 1:length(msRawData_QCs)){
     # 
     #   filterMz(mzRanges[i,])
     
-    noise <- xcms:::estimateChromNoise(int, trim = 0.05,
+    noise <- xcms:::estimateChromNoise(plotdata1$intensity, trim = 0.05,
                                    minPts = 3 )
     
-    pks <- peaksWithCentWave(int,rt,peakwidth = c(2,50),snthresh = 0, firstBaselineCheck = F, fitgauss = T, noise = noise  , integrate = 1 ,prefilter= c(1,noise),extendLengthMSW = T)
+    pks <- peaksWithCentWave(plotdata1$intensity,plotdata1$rt,peakwidth = c(5,30),snthresh = 0, firstBaselineCheck = F, fitgauss = T, noise = noise  , integrate = 1 ,prefilter= c(1,noise),extendLengthMSW = T)
     
     
    
@@ -398,7 +394,7 @@ for(p in 1:length(msRawData_QCs)){
       pks <- pks[min,]
       }
     
-       plot(rt,int, type = "l") 
+       plot(plotdata1$rt,plotdata1$intensity, type = "l") 
     rect(xleft = pks[, "rtmin"], xright = pks[, "rtmax"],
      ybottom = rep(0, nrow(pks)), ytop = pks[, "maxo"], col = "#ff000040",
      border = "#00000040")
@@ -432,6 +428,7 @@ for(k in 1:dim(targExtracRes_QC[1])){
   
   
   componentID = k
+ 
   
   plotdata_list_1 <- list()
   plotdata_list_std_1 <- list()
@@ -450,7 +447,7 @@ for(k in 1:dim(targExtracRes_QC[1])){
     plotdata1 <- as.data.frame(plotEICdata1)
     plotdata1$rt <- as.numeric(plotdata1$rt)
     plotdata1$rt <- plotdata1$rt / 60
-    
+    plot(plotdata1$rt,plotdata1$intensity)
    
     plotdata_list_1 <-c(plotdata_list_1,list(plotdata1))
     
@@ -503,7 +500,7 @@ for(k in 1:dim(targExtracRes_QC[1])){
     xlab('RT (min)') +
     scale_x_continuous(breaks = round(seq(min(plotdata2$rt), max(plotdata2$rt), by = 0.5),1)) +
     theme_light() +
-    geom_vline(xintercept = targExtracRes_QC$tr[componentID]/60, linetype = "dotted", size = 1, col = "red") +
+    geom_vline(xintercept = targExtracRes_QC$tr[componentID]/60, linetype = "dotted", size = 1, col = "red") 
 
   
   
