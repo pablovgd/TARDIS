@@ -68,6 +68,8 @@ pca_res <- prcomp(feat_table[,c(3,4,5,6)], scale. = TRUE)
 
 autoplot(pca_res, data = feat_table, colour = 'rating')
 
+##Adding extra analyses of correlation of areas.
+
 auc <- read_csv("K:/shares/di04_limet_bioinformatics/PhD Pablo/Publicaties/WIP/TARDIS/data/metabease_metabolomics/positive/auc_table.csv")
 
 
