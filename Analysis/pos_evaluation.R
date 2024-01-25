@@ -124,11 +124,17 @@ goodfeat <- goodfeat[which(goodfeat$rating == "Good"),]
 xcal <- xcal[,intersect(colnames(xcal),goodfeat$Component)]
 tardis <- tardis[,intersect(colnames(tardis),goodfeat$Component)]
 
+xcal <- impute.knn(as.matrix(xcal))
+tardis <- impute.knn(as.matrix(tardis))
 
+xcal <- xcal[[1]]
+tardis <- tardis[[1]]
 
 for(component in 1:142){
   x <- xcal[,component]
-  y <- unlist(tardis[,component])
+  x <- pareto_scale(log1p(x))
+  y <- tardis[,component]
+  y <- pareto_scale(log1p(y))
   cortest <- cor.test(x,y)
   cor <- cortest$estimate
   p <- cortest$p.value
