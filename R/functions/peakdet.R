@@ -32,15 +32,43 @@ find_true_occurrence <- function(vector, point) {
   return(result)
 }
 
-find_peak_points <- function(vector) {
+find_peak_points <- function(rtvector, vector, searchrt) {
   # Compute the derivative of the vector
 
   
   # Find the indices where the derivative changes sign
   sign_changes <-  c(FALSE, diff(diff(vector)>0)!=0)
   
-  # Find the index of the peak
+  # Find absolute maximum
   peak_index <- which.max(vector)
+  
+  # Find the local maxima
+  
+  all_local_max <- which(diff(sign(diff(vector)))==-2)+1
+  
+  
+  # Delete local maxima with an intensity lower than 50k
+  
+  local_max <- c()
+  
+  for(lmax in all_local_max){
+    if(vector[lmax] > 1e5){
+      local_max <- cbind(local_max,lmax)
+    }
+  }
+  
+  
+  # Find the max intensity closest to the searchrt
+  
+  maxrts <- rtvector[c(peak_index,local_max)]
+  
+ 
+  differences <- abs(maxrts - searchrt)
+  
+  # Find the position (index) with the minimum difference
+  closest_position <- which.min(differences)
+  
+  peak_index <- which(rtvector == maxrts[closest_position])
   
   # Find the left and right points from the peak
   occur <- find_true_occurrence(sign_changes,peak_index)
@@ -52,5 +80,5 @@ find_peak_points <- function(vector) {
     occur$right_true = length(vector)
   }
   
-  return(list(left = occur$left_true, right = occur$right_true))
+  return(list(left = occur$left_true, right = occur$right_true,foundrt = rtvector[peak_index],peakindex = peak_index))
 }

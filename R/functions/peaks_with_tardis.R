@@ -84,12 +84,12 @@ tardis_peaks <-
       sampleData(data_batch)$sample_type[grep(pattern = QC_pattern, files_batch)] <- "QC"
       
       
-      #param <- ObiwarpParam(binSize = 0.1,subset = which(sampleData(data_batch)$sample_type == "QC"))
-      test <- as.matrix(cbind(rtmed,rtmed,rtmed,rtmed))
-      param <- PeakGroupsParam(minFraction = 0.5, peakGroupsMatrix = test, subset = which(sampleData(data_batch)$sample_type == "QC"))
+      param <- ObiwarpParam(binSize = 0.1,subset = which(sampleData(data_batch)$sample_type == "QC"))
+      #test <- as.matrix(cbind(rtmed,rtmed,rtmed,rtmed))
+      #param <- PeakGroupsParam(minFraction = 0.9, peakGroupsMatrix = test[1:50,], subset = which(sampleData(data_batch)$sample_type == "QC"))
       
 
-      data_batch <- adjustRtime(data_batch, param = param,)
+      data_batch <- adjustRtime(data_batch, param = param)
       
       data_batch <- applyAdjustedRtime(data_batch)
       
@@ -170,7 +170,7 @@ tardis_peaks <-
           
           smoothed <- sgolayfilt(int, p = 3, n = 7)
           
-          border <- find_peak_points(smoothed)
+          border <- find_peak_points(rt, smoothed,dbData$tr[j])
           
           x <- rt[border$left:border$right]
           y <- int[border$left:border$right]
@@ -188,8 +188,8 @@ tardis_peaks <-
             # Calculate QScore
             qscore <- qscoreCalculator(x, y)
             
-            found_rt <- rt[which(int == max(int))]
-            max_int = max(int)
+            found_rt <- border$foundrt
+            max_int = int[border$peakindex]
             
             # Get information about the current component from info_compounds
             compound_info <- dbData[j,]
@@ -321,6 +321,7 @@ tardis_peaks <-
                   unlist(intensity(sfs_agg), use.names = FALSE))
           
           
+          eic <- eic[which(duplicated(eic[,1]) == FALSE),]
           
           
           rt <- eic[, 1]
@@ -331,7 +332,7 @@ tardis_peaks <-
           
           smoothed <- sgolayfilt(int, p = 3, n = 7)
           
-          border <- find_peak_points(smoothed)
+          border <- find_peak_points(rt, smoothed, dbData$tr[j])
           
           x <- rt[border$left:border$right]
           y <- int[border$left:border$right]
@@ -349,8 +350,8 @@ tardis_peaks <-
             # Calculate QScore
             qscore <- qscoreCalculator(x, y)
             
-            found_rt <- rt[which(int == max(int))]
-            max_int = max(int)
+            found_rt <- border$foundrt
+            max_int = int[border$peakindex]
             
             # Get information about the current component from info_compounds
             compound_info <- dbData[j,]
