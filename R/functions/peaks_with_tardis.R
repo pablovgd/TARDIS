@@ -84,9 +84,11 @@ tardis_peaks <-
       sampleData(data_batch)$sample_type[grep(pattern = QC_pattern, files_batch)] <- "QC"
       
       
-      param <- ObiwarpParam(binSize = 0.1,subset = which(sampleData(data_batch)$sample_type == "QC"))
-      #test <- as.matrix(cbind(rtmed,rtmed,rtmed,rtmed))
-      #param <- PeakGroupsParam(minFraction = 0.9, peakGroupsMatrix = test[1:50,], subset = which(sampleData(data_batch)$sample_type == "QC"))
+      rtmed <- dbData$tr
+      #param <- ObiwarpParam(binSize = 0.1,subset = which(sampleData(data_batch)$sample_type == "QC"))
+      rts <- as.matrix(cbind(rtmed,rtmed,rtmed,rtmed))
+      internal_standards <- rts[c(19,32,30,33,31),]
+      param <- PeakGroupsParam(minFraction = 0.5, peakGroupsMatrix = internal_standards, subset = which(sampleData(data_batch)$sample_type == "QC"))
       
 
       data_batch <- adjustRtime(data_batch, param = param)
@@ -113,11 +115,25 @@ tardis_peaks <-
       sample_names <-
         lapply(data_QC@sampleData$spectraOrigin, basename)
       
-      ranges <- createRanges(data_QC, dbData, ppm, rtdev)
+      ranges <- createRanges(data_batch, dbData, ppm, rtdev)
       mzRanges <- ranges[[1]]
       rtRanges <- ranges[[2]]
       
       spectra <- data_QC@spectra
+      # 
+      # pks <- cbind(mzRanges,rtRanges)
+      # 
+      # colnames(pks) <- c("mzmin", "mzmax", "rtmin" , "rtmax")
+      # 
+      # res <- manualChromPeaks(data_batch, pks)
+      # 
+      # 
+      # chromPeaks(res)
+      # 
+      # 
+      # pdp <- PeakDensityParam(sampleGroups = sampleData(res)$sample_type,
+      #                         minFraction = 0.4, bw = 30)
+      # res <- groupChromPeaks(res, param = pdp)
       
       for (j in 1:dim(rtRanges)[1]) {
         rt_list = list()

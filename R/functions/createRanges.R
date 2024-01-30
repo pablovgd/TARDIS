@@ -17,7 +17,7 @@ createRanges <- function(msData,dbData,ppm,rtdev){
     cbind(as.numeric(mzmed) - mzdeltas,
           as.numeric(mzmed) + mzdeltas)
   
-  spectra = data_QC@spectra
+  spectra = msData@spectra
   
   #if an upper m/z boundary is lower than the minimum m/z range, set it to the minimum m/z
   indexTemp <-
