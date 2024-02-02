@@ -583,7 +583,7 @@ dbData <- createTargetList(input_directory_targets = "D:/Data/Metabease/metabolo
 #batch_positions = list(c(1,149),c(150,294))
 batch_positions = list(c(1,20),c(21,40))
 
-result <- tardis_peaks(file_path = "D:/Data/Metabease/metabolomics_feces/positive/", dbData = dbData, ppm = 5, rtdev = 18, mode = "metabolomics" , polarity = "positive", output_directory =  "D:/Data/Metabease/metabolomics_feces/positive/", plots_samples = TRUE, plots_QC = TRUE, batch_mode = TRUE, batch_positions = batch_positions, sample_pattern = "", QC_pattern = "QC")
+result <- tardis_peaks(file_path = "D:/Data/Metabease/metabolomics_feces/positive/", dbData = dbData, ppm = 5, rtdev = 18, mode = "metabolomics" , polarity = "positive", output_directory =  "D:/Data/Metabease/metabolomics_feces/positive/", plots_samples = TRUE, plots_QC = TRUE, batch_mode = TRUE, batch_positions = batch_positions, sample_pattern = "", QC_pattern = "QC",int_std_id = c("331","1578","1576","1583","1577"))
 
 end <- Sys.time()
 
