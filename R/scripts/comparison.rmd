@@ -26,6 +26,7 @@ library(stringr)
 library(readxl)
 library(Polychrome)
 library(openxlsx)
+library(progress)
 
 ```
 
@@ -574,6 +575,7 @@ source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/
 source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/createTargetList.R")
 source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/plotQCs.R")
 source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/plotSamples.R")
+source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/manualchrompeaks_fix.R")
 source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/peaks_with_tardis.R")
 
 start <- Sys.time()
