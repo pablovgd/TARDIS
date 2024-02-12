@@ -145,16 +145,23 @@ tardis_peaks_centwave <-
       colnames(pks) <- c("mzmin", "mzmax", "rtmin" , "rtmax")
 
       res <- manualChromPeaks(data_QC, pks)
-      # 
-      # 
-      # chromPeaks(res)
-      # 
-      # 
-      # pdp <- PeakDensityParam(sampleGroups = sampleData(res)$sample_type,
-      #                         minFraction = 0.4, bw = 30)
-      # res <- groupChromPeaks(res, param = pdp)
+    
+      pdp <- PeakDensityParam(sampleGroups = sampleData(res)$sample_type,
+                              minFraction = 0.4, bw = 30)
+      res <- groupChromPeaks(res, param = pdp)
       
+      res_chroms <- featureChromatograms(res)
       
+      dir.create(paste0(output_directory, "QCbatch_", batchnr))
+      
+      for(i in 1:dim(res_chroms)[1]){
+        plot_file <- rownames(featureDefinitions(res))[i]
+        png(filename = file.path(paste0(output_directory, "QCbatch_", batchnr),
+                                 paste0(plot_file,".png")))
+        par(mar=c(1,1,1,1))
+        plot(res_chroms[i,])
+        dev.off()
+      }
       
       #Next do the whole analysis for the samples in the same batch of the QC's to find ALL the compounds at the corrected RT.
       
