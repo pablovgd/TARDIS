@@ -105,19 +105,16 @@ tardis_peaks_centwave <-
       internal_standards_mz <- mzRanges[which(dbData$ID %in% int_std_id),]
       
       #Get QC sample names
-      sample_names <-
+      QC_sample_names <-
         lapply(data_QC@sampleData$spectraOrigin, basename)
       
-      #Initiate empty vectors
-      int_std_foundrt <- c()
-      int_std <- c()
       
       #Retrieve foundRT of internal standards in QC's using centWave with manualChromPeaks
       pks <- cbind(internal_standards_mz,internal_standards_rt)
       colnames(pks) <- c("mzmin","mzmax","rtmin","rtmax")
       res <- manualChromPeaks_2(as(data_QC,"XcmsExperiment"),pks)
       rt_res <- chromPeaks(res)[,4] 
-      int_std <- matrix(rt_res,nrow = length(int_std_id),ncol=length(sample_names),byrow = FALSE) 
+      int_std <- matrix(rt_res,nrow = length(int_std_id),ncol=length(QC_sample_names),byrow = FALSE) 
       
       
       #Define parameters for retention time adjustment, based on the QC's and the internal standards
@@ -134,7 +131,7 @@ tardis_peaks_centwave <-
       
       data_QC <- data_batch[which(sampleData(data_batch)$sample_type == "QC")]
       
-      sample_names <-
+      QC_sample_names <-
         lapply(data_QC@sampleData$spectraOrigin, basename)
       
       
@@ -146,22 +143,41 @@ tardis_peaks_centwave <-
 
       res <- manualChromPeaks(data_QC, pks)
     
-      pdp <- PeakDensityParam(sampleGroups = sampleData(res)$sample_type,
-                              minFraction = 0.4, bw = 30)
-      res <- groupChromPeaks(res, param = pdp)
+      #' pdp <- PeakDensityParam(sampleGroups = sampleData(res)$sample_type,
+      #'                         minFraction = 0.1, bw = 10)
+      #' res <- groupChromPeaks(res, param = pdp)
+      #' 
+      #' #' Get the feat peaks from our data set
+      #' cpks <- as.data.frame(featureDefinitions(res))
+      #' cpks$peak_id <- rownames(cpks)
       
-      res_chroms <- featureChromatograms(res)
+      # matched <- matchValues(cpks,info_compounds,MzRtParam( ppm = 5, toleranceRt = 6),mzColname = c("mzmed","m/z"),rtColname = c("rtmed","tr"))
+      # 
+      # for(i in 1:dim(cpks)[1]){
+      # cpks$comp_name[i] = matched@matches$target_idx[which(matched@matches$query_idx == i)]
+      # }
       
+      #for lusje voor plots
       dir.create(paste0(output_directory, "QCbatch_", batchnr))
       
-      for(i in 1:dim(res_chroms)[1]){
-        plot_file <- rownames(featureDefinitions(res))[i]
-        png(filename = file.path(paste0(output_directory, "QCbatch_", batchnr),
-                                 paste0(plot_file,".png")))
-        par(mar=c(1,1,1,1))
-        plot(res_chroms[i,])
+      for(i in 1:length(info_compounds$NAME)){
+       res_chrom <-chromatogram(res, mz = mzRanges[i,], rt = rtRanges[i,])
+       png(file = paste0(paste0(output_directory, "QCbatch_", batchnr,"/"),paste(paste0("ID",info_compounds$ID[i]), info_compounds$NAME[i]),".png"))
+       plot(res_chrom, main = paste(paste0("ID",info_compounds$ID[i]), info_compounds$NAME[i]))
+       dev.off()
+      }
+
+      generate_QC_plot <- function(i) {
+        res_chrom <- chromatogram(res, mz = mzRanges[i, ], rt = rtRanges[i, ])
+        png(file = paste0(paste0(output_directory, "QCbatch_", batchnr, "/"),
+                          paste(paste0("ID", info_compounds$ID[i]), info_compounds$NAME[i]), ".png"))
+        plot(res_chrom, main = paste(paste0("ID", info_compounds$ID[i]), info_compounds$NAME[i]))
         dev.off()
       }
+      
+      # Use lapply to apply the function to each index
+      lapply(1:length(info_compounds$NAME), generate_QC_plot)
+      
       
       #Next do the whole analysis for the samples in the same batch of the QC's to find ALL the compounds at the corrected RT.
       

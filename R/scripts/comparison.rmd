@@ -580,12 +580,12 @@ source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/
 
 start <- Sys.time()
 
-dbData <- createTargetList(input_directory_targets = "D:/Data/Metabease/metabolomics_feces/positive/targets.xlsx",pos_pattern = "+",neg_pattern = "-",polarity = 'positive',ion_column = "ion",columns_of_interest = c("id","name","mz","rt"))
+dbData <- createTargetList(input_directory_targets = "D:/Data/Metabease/metabolomics_feces/positive/targets_modified.xlsx",pos_pattern = "+",neg_pattern = "-",polarity = 'positive',ion_column = "ion",columns_of_interest = c("id","name","mz","rt"))
 
 #batch_positions = list(c(1,149),c(150,294))
 batch_positions = list(c(1,20),c(21,40))
 
-result <- tardis_peaks(file_path = "D:/Data/Metabease/metabolomics_feces/positive/", dbData = dbData, ppm = 5, rtdev = 18, mode = "metabolomics" , polarity = "positive", output_directory =  "D:/Data/Metabease/metabolomics_feces/positive/", plots_samples = TRUE, plots_QC = TRUE, batch_mode = TRUE, batch_positions = batch_positions, sample_pattern = "", QC_pattern = "QC",int_std_id = c("331","1578","1576","1583","1577"))
+result <- tardis_peaks(file_path = "D:/Data/Metabease/metabolomics_feces/positive/", dbData = dbData, ppm = 5, rtdev = 12, mode = "metabolomics" , polarity = "positive", output_directory =  "D:/Data/Metabease/metabolomics_feces/positive/", plots_samples = TRUE, plots_QC = TRUE, batch_mode = TRUE, batch_positions = batch_positions, sample_pattern = "", QC_pattern = "QC",int_std_id = c("331","1578","1576","1583","1577"))
 
 end <- Sys.time()
 
