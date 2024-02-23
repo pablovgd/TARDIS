@@ -11,7 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r, setup, include=FALSE}
-knitr::opts_knit$set(root.dir = 'C:/Users/pvgeende/OneDrive - UGent/Documents/TARDIS/')
+
+knitr::opts_knit$set(root.dir = "C:/Users/pvgeende/OneDrive - UGent/Documents/TARDIS/")
+getwd()
+
 ```
 
 This document was constructed to test different methods to extract and integrate peaks in LC-MS data. Showing the need for a better integrated and better performing tool. As a quick test and proof of concept, two runs of an analytical standard mixture are used. If everything goes well, these concepts, scripts and functions can be directly applied to the final sample datasets.
@@ -573,7 +576,7 @@ My own approach is really simple and was created to recreate as much as possible
 I've poored the whole thing into one function, sourced from a different script.
 
 ```{r}
-
+setwd("C:/Users/pvgeende/OneDrive - UGent/Documents/TARDIS/")
 source(file = "R/functions/peakdet.R")
 source(file = "R/functions/quality.R")
 source(file = "R/functions/createRanges.R")
@@ -587,9 +590,9 @@ start <- Sys.time()
 
 dbData <- createTargetList(input_directory_targets = "D:/Data/Metabease/metabolomics_feces/positive/targets.xlsx",pos_pattern = "+",neg_pattern = "-",polarity = 'positive',ion_column = "ion",columns_of_interest = c("id","name","mz","rt"))
 
-#batch_positions = list(c(1,149),c(150,294))
+batch_positions = list(c(1,149),c(150,294))
 #batch_positions = list(c(1,20),c(21,40))
-batch_positions = list(c(1,294))
+#batch_positions = list(c(1,294))
 
 result <- tardis_peaks(file_path = "D:/Data/Metabease/metabolomics_feces/positive/", dbData = dbData, ppm = 5, rtdev = 12, mode = "metabolomics" , polarity = "positive", output_directory =  "D:/Data/Metabease/metabolomics_feces/positive/", plots_samples = TRUE, plots_QC = TRUE, batch_mode = TRUE, batch_positions = batch_positions, sample_pattern = "", QC_pattern = "QC",int_std_id = c("331","1578","1576","1583","1577"))
 

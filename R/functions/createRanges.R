@@ -7,7 +7,7 @@ createRanges <- function(msData,dbData,ppm,rtdev){
   mzmed <- dbData$`m/z`
   rtmed <- dbData$tr
   
-  
+  deltaTR <- rtdev
   
   mzdeltas <- sapply(mzmed, function(mzmed)
     mzmed * ppm / 10 ^ 6)

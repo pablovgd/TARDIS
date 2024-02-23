@@ -45,7 +45,7 @@ tardis_peaks_centwave <-
     #With these two parameters, you can set the allowed errors for mass & retention time!
     ppm <-
       ppm #ppm error for EIC extraction #POLAR = 5ppm / LIPIDOMICS =  10 ppm
-    deltaTR = rtdev
+    deltaTR <- rtdev
     
     #save compound info
     info_compounds <- dbData

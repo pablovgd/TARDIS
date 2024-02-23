@@ -52,7 +52,7 @@ find_peak_points <- function(rtvector, vector, searchrt) {
   local_max <- c()
   
   for(lmax in all_local_max){
-    if(vector[lmax] > 1e5){
+    if(vector[lmax] > 5e4){
       local_max <- cbind(local_max,lmax)
     }
   }

@@ -43,9 +43,9 @@ tardis_peaks <-
     mode <-
       mode #you can change the mode here, needs to be "lipidomics" or "metabolomics"
     #With these two parameters, you can set the allowed errors for mass & retention time!
-    ppm <-
-      ppm #ppm error for EIC extraction #POLAR = 5ppm / LIPIDOMICS =  10 ppm
-    deltaTR = rtdev
+    ppm <- ppm #ppm error for EIC extraction #POLAR = 5ppm / LIPIDOMICS =  10 ppm
+    
+    deltaTR <- rtdev
     
     #save compound info
     info_compounds <- dbData
@@ -94,7 +94,7 @@ tardis_peaks <-
       #Extract spectra
       spectra_QC <- data_QC@spectra
       #Create ranges for all compounds
-      ranges <- createRanges(data_QC, dbData, ppm, rtdev)
+      ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
       #Get mz & rt ranges
       mzRanges <- ranges[[1]]
       rtRanges <- ranges[[2]]
@@ -361,7 +361,7 @@ tardis_peaks <-
       
       results_QCs <- rbind(results_QCs, results_QCs_batch)
       
-      #Next do the whole analysis for the samples in the same batch of the QC's to find ALL the compounds at the corrected RT.
+      #Next do the whole analysis for the samples in the same batch of the QC's to find ALL the compounds at the corrected RT. (SAMPLES + QC)
       
       
       # data_samples <-
@@ -372,7 +372,8 @@ tardis_peaks <-
       #   )
       
       #Get sample data
-      data_samples <- data_batch[which(sampleData(data_batch)$sample_type == "study")]
+      data_samples <- data_batch
+      #data_samples <- data_batch[which(sampleData(data_batch)$sample_type == "study")]
       
       
       # data_samples <- adjustRtime(data_samples,param = ObiwarpParam()) 
@@ -402,7 +403,7 @@ tardis_peaks <-
       }
       
       #Create ranges around new RT 
-      ranges <- createRanges(data_samples, dbData, ppm, rtdev)
+      ranges <- createRanges(data_samples, dbData, ppm, deltaTR)
       mzRanges <- ranges[[1]]
       rtRanges <- ranges[[2]]
       
