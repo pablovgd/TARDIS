@@ -91,8 +91,7 @@ tardis_peaks_centwave <-
       #Subselect QC files, first we will locate the peaks of the internal standards in the QC files of this batch to align the rest of the batch data to
       
       data_QC <- data_batch[which(sampleData(data_batch)$sample_type == "QC")]
-      #Extract spectra
-      spectra_QC <- data_QC@spectra
+     
       #Create ranges for all compounds
       ranges <- createRanges(data_QC, dbData, ppm, rtdev)
       #Get mz & rt ranges
@@ -112,13 +111,17 @@ tardis_peaks_centwave <-
       #Retrieve foundRT of internal standards in QC's using centWave with manualChromPeaks
       pks <- cbind(internal_standards_mz,internal_standards_rt)
       colnames(pks) <- c("mzmin","mzmax","rtmin","rtmax")
-      res <- manualChromPeaks_2(as(data_QC,"XcmsExperiment"),pks)
-      rt_res <- chromPeaks(res)[,4] 
-      int_std <- matrix(rt_res,nrow = length(int_std_id),ncol=length(QC_sample_names),byrow = FALSE) 
+      res <- manualChromPeaks(data_QC,pks)
+      chrompeaks_res <- data.frame(chromPeaks(res))
+      incomplete <- which(table(chrompeaks_res$sample) < length(int_std_id) )
+      chrompeaks_res <- chrompeaks_res[-which(chrompeaks_res$sample %in% incomplete),]
+      rt_res <- chrompeaks_res$rt
+      int_std <- matrix(rt_res,nrow = length(int_std_id),ncol=length(QC_sample_names)-length(incomplete),byrow = FALSE) 
+      
       
       
       #Define parameters for retention time adjustment, based on the QC's and the internal standards
-      param <- PeakGroupsParam(minFraction = 0.9, peakGroupsMatrix = int_std, subset = which(sampleData(data_batch)$sample_type == "QC"))
+      param <- PeakGroupsParam(minFraction = 0.9, peakGroupsMatrix = int_std, subset =  which(sampleData(data_batch)$sample_type == "QC")[-incomplete])
       
       #Adjust the RT
       data_batch <- adjustRtime(data_batch, param = param)
@@ -159,41 +162,25 @@ tardis_peaks_centwave <-
       
       #for lusje voor plots
       dir.create(paste0(output_directory, "QCbatch_", batchnr))
-      
-      for(i in 1:length(info_compounds$NAME)){
-       res_chrom <-chromatogram(res, mz = mzRanges[i,], rt = rtRanges[i,])
-       png(file = paste0(paste0(output_directory, "QCbatch_", batchnr,"/"),paste(paste0("ID",info_compounds$ID[i]), info_compounds$NAME[i]),".png"))
-       plot(res_chrom, main = paste(paste0("ID",info_compounds$ID[i]), info_compounds$NAME[i]))
-       dev.off()
-      }
-
       generate_QC_plot <- function(i) {
-        res_chrom <- chromatogram(res, mz = mzRanges[i, ], rt = rtRanges[i, ])
+        res_chrom <- chromatogram(res, mz = mzRanges[i, ], rt = rtRanges[i, ],BPPARAM = bpparam())
         png(file = paste0(paste0(output_directory, "QCbatch_", batchnr, "/"),
-                          paste(paste0("ID", info_compounds$ID[i]), info_compounds$NAME[i]), ".png"))
+                          paste(paste0("ID", info_compounds$ID[i]),".png")))
         plot(res_chrom, main = paste(paste0("ID", info_compounds$ID[i]), info_compounds$NAME[i]))
         dev.off()
+        
       }
       
       # Use lapply to apply the function to each index
-      lapply(1:length(info_compounds$NAME), generate_QC_plot)
+      future_lapply(1:length(info_compounds$NAME), generate_QC_plot)
       
       
-      #Next do the whole analysis for the samples in the same batch of the QC's to find ALL the compounds at the corrected RT.
+      #Next do the whole analysis for the samples in the same batch of the QC's to find ALL the compounds at the corrected RT in both study samples & QC's.
       
       
-      # data_samples <-
-      #   readMsExperiment(
-      #     spectraFiles = sample_files,
-      #     backend = MsBackendMzR(),
-      #     BPPARAM = SnowParam(workers = 1)
-      #   )
-      
+   
       #Get sample data
       data_samples <- data_batch[which(sampleData(data_batch)$sample_type == "study")]
-      
-      
-      # data_samples <- adjustRtime(data_samples,param = ObiwarpParam()) 
       
       
       sample_names <-
@@ -201,15 +188,19 @@ tardis_peaks_centwave <-
       
       
       # Replace rtmed with average foundRT from previous results
+      new_rt_avg <- c()
+      chrompeaks <- as.data.frame(chromPeaks(res))
       
-      new_rt_avg <- results_QCs_batch %>%
-        group_by(ID) %>%
-        summarise(mean = mean(foundRT), na.rm = TRUE)
+      for(i in 1:length(info_compounds$NAME)){ 
+        pkscmp <- chrompeaks[which(chrompeaks$mzmin >= mzRanges[i,1] & chrompeaks$mzmax <= mzRanges[i,2] & chrompeaks$rtmin >= rtRanges[i,1] & chrompeaks$rtmax <= rtRanges[i,2]),]
+        rt_avg <- mean(pkscmp$rt)
+        new_rt_avg <- c(new_rt_avg, rt_avg)
+      }
       
-      dbData <- merge(dbData, new_rt_avg, by = "ID")
+      
       
       dbData$trold <- dbData$tr
-      dbData$tr <- new_rt_avg$mean
+      dbData$tr <- new_rt_avg
       
       #If no RT is found, restore old RT
       
@@ -224,124 +215,39 @@ tardis_peaks_centwave <-
       mzRanges <- ranges[[1]]
       rtRanges <- ranges[[2]]
       
-      spectra <- data_samples@spectra
       
-      for (j in 1:dim(rtRanges)[1]) {
-        rt_list = list()
-        int_list = list()
-        x_list = list()
-        y_list = list()
-        
-        for (i in 1:length(sample_names)) {
-          sample_name <- unlist(sample_names[i])
-          # chromatograms <-
-          #   chromatogram(data_QC, rt = rtRanges[j, ], mz = mzRanges[j, ])
-          # rt <- chromatograms@.Data[[i]]@rtime
-          # int <- chromatograms@.Data[[i]]@intensity
-          
-          
-          sample_spectra <-
-            filterDataOrigin(spectra, unique(dataOrigin(spectra))[i])
-          sample_spectra <-
-            filterRt(sample_spectra, rtRanges[j,])
-          sample_spectra <-
-            filterMzRange(sample_spectra, mzRanges[j,])
-          
-          sfs_agg <-
-            addProcessing(sample_spectra, .sum_intensities)
-          eic <-
-            cbind(rtime(sfs_agg),
-                  unlist(intensity(sfs_agg), use.names = FALSE))
-          
-          
-          eic <- eic[which(duplicated(eic[,1]) == FALSE),]
-          
-          
-          rt <- eic[, 1]
-          int <- eic[, 2]
-          
-          
-          int[which(is.na(int))] = 0
-          
-          smoothed <- sgolayfilt(int, p = 3, n = 7)
-          
-          border <- find_peak_points(rt, smoothed, dbData$tr[j])
-          
-          x <- rt[border$left:border$right]
-          y <- int[border$left:border$right]
-          
-          rt_list <- c(rt_list, list(rt))
-          int_list <- c(int_list, list(int))
-          x_list <- c(x_list, list(x))
-          y_list <- c(y_list, list(y))
-          
-          # Check if there are at least two unique values for the component
-          if (length(unique(y)) > 1) {
-            # Calculate AUC
-            auc <- trapz(x, y)
-            
-            # Calculate QScore
-            qscore <- qscoreCalculator(x, y)
-            
-            found_rt <- border$foundrt
-            max_int = int[border$peakindex]
-            
-            # Get information about the current component from info_compounds
-            compound_info <- dbData[j,]
-            
-            # Append results to the data frame with compound information
-            results_samples <- rbind(
-              results_samples,
-              data.frame(
-                Component = compound_info$ID,
-                Sample = sample_name,
-                AUC = auc,
-                MaxInt = max_int,
-                SNR = qscore[1],
-                peak_cor = qscore[2],
-                foundRT = found_rt,
-                compound_info
-              )
-            )
-            
-          } else{
-            compound_info <- dbData[j,]
-            
-            # Append results to the data frame with compound information
-            results_samples <- rbind(
-              results_samples,
-              data.frame(
-                Component = compound_info$ID,
-                Sample = sample_name,
-                AUC = NA,
-                MaxInt = NA,
-                SNR = NA,
-                peak_cor = NA,
-                foundRT = NA,
-                compound_info
-              )
-            )
-          }
-          
-        }
-        # Create and save the plot for the current component
-        
-        if (plots_samples == TRUE) {
-          plotSamples(
-            compound_info,
-            output_directory,
-            rt_list,
-            int_list,
-            x_list,
-            y_list,
-            batchnr,
-            sample_names
-          )
-        }
-        
+      
+      pks <- cbind(mzRanges,rtRanges)
+      
+      colnames(pks) <- c("mzmin", "mzmax", "rtmin" , "rtmax")
+      
+      res <- manualChromPeaks(data_batch, pks)      
+      
+      feat_res <- groupChromPeaks(res,param = PeakDensityParam(sampleGroups = res@sampleData$sample_type))
+      
+      #Now we need to annotate the features to our target compounds
+      
+      matched <- matchValues(featureDefinitions(feat_res),dbData,MzRtParam( ppm = 5, toleranceRt = 6),mzColname = c("mzmed","m/z"),rtColname = c("rtmed","tr"))
+      
+      matched_feat_unique <- matched@matches[which(!duplicated(matched@matches$query_idx)),]
+      
+      feat_def_matched <- featureDefinitions(feat_res)[matched_feat_unique$query_idx,]
+      
+      feat_val_matched <- featureValues(feat_res)[matched_feat_unique$query_idx,]
+      
+      feat_def_matched$Name <- matched@target$NAME[matched_feat_unique$target_idx]
+      feat_def_matched$ID <-  matched@target$ID[matched_feat_unique$target_idx]
+      
+      filtered_feat_res <- filterFeatureDefinitions(feat_res, features = rownames(feat_def_matched))
+      
+      chrom <- featureChromatograms(filtered_feat_res)
+      
+      for(i in 1:dim(chrom)[1]){
+        plot(chrom[i,], main = paste(feat_def_matched$Name[i],"ID",feat_def_matched$ID[i]))
       }
+      
+      
     }
-    
     
     results <- results_samples
     

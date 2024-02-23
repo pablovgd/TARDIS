@@ -9,6 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = 'C:/Users/pvgeende/OneDrive - UGent/Documents/TARDIS/')
+```
+
 This document was constructed to test different methods to extract and integrate peaks in LC-MS data. Showing the need for a better integrated and better performing tool. As a quick test and proof of concept, two runs of an analytical standard mixture are used. If everything goes well, these concepts, scripts and functions can be directly applied to the final sample datasets.
 
 ```{r include=FALSE}
@@ -27,6 +32,7 @@ library(readxl)
 library(Polychrome)
 library(openxlsx)
 library(progress)
+library(future)
 
 ```
 
@@ -568,22 +574,22 @@ I've poored the whole thing into one function, sourced from a different script.
 
 ```{r}
 
-
-source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/peakdet.R")
-source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/quality.R")
-source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/createRanges.R")
-source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/createTargetList.R")
-source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/plotQCs.R")
-source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/plotSamples.R")
-source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/manualchrompeaks_fix.R")
-source(file = "S:/di04_limet_bioinformatics/PhD Pablo/R_code/TARDIS/R/functions/peaks_with_tardis.R")
+source(file = "R/functions/peakdet.R")
+source(file = "R/functions/quality.R")
+source(file = "R/functions/createRanges.R")
+source(file = "R/functions/createTargetList.R")
+source(file = "R/functions/plotQCs.R")
+source(file = "R/functions/plotSamples.R")
+source(file = "R/functions/manualchrompeaks_fix.R")
+source(file = "R/functions/peaks_with_tardis.R")
 
 start <- Sys.time()
 
-dbData <- createTargetList(input_directory_targets = "D:/Data/Metabease/metabolomics_feces/positive/targets_modified.xlsx",pos_pattern = "+",neg_pattern = "-",polarity = 'positive',ion_column = "ion",columns_of_interest = c("id","name","mz","rt"))
+dbData <- createTargetList(input_directory_targets = "D:/Data/Metabease/metabolomics_feces/positive/targets.xlsx",pos_pattern = "+",neg_pattern = "-",polarity = 'positive',ion_column = "ion",columns_of_interest = c("id","name","mz","rt"))
 
 #batch_positions = list(c(1,149),c(150,294))
-batch_positions = list(c(1,20),c(21,40))
+#batch_positions = list(c(1,20),c(21,40))
+batch_positions = list(c(1,294))
 
 result <- tardis_peaks(file_path = "D:/Data/Metabease/metabolomics_feces/positive/", dbData = dbData, ppm = 5, rtdev = 12, mode = "metabolomics" , polarity = "positive", output_directory =  "D:/Data/Metabease/metabolomics_feces/positive/", plots_samples = TRUE, plots_QC = TRUE, batch_mode = TRUE, batch_positions = batch_positions, sample_pattern = "", QC_pattern = "QC",int_std_id = c("331","1578","1576","1583","1577"))
 
