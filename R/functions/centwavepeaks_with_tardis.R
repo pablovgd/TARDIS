@@ -315,7 +315,7 @@ tardis_peaks_centwave <-
     }
     
     # Save the Excel workbook to a file
-    saveWorkbook(wb, paste0(output_directory, "feat_table.xlsx"))
+    saveWorkbook(wb, paste0(output_directory, "feat_table.xlsx"),overwrite = TRUE)
     
     return(list(auc_table, avg_metrics_table))
   }

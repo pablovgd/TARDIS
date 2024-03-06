@@ -8,10 +8,12 @@ tardis_peaks <-
            output_directory,
            plots_samples,
            plots_QC,
+           diagnostic_plots,
            batch_mode,
            batch_positions,
            QC_pattern,
            sample_pattern,
+           rt_alignment,
            int_std_id) {
     #Create empty dataframe for sample results
     results_samples <-
@@ -99,115 +101,104 @@ tardis_peaks <-
       mzRanges <- ranges[[1]]
       rtRanges <- ranges[[2]]
       
-      #Get the ranges for the internal standard compounds
       
-      internal_standards_rt <- rtRanges[which(dbData$ID %in% int_std_id),]
-      internal_standards_mz <- mzRanges[which(dbData$ID %in% int_std_id),]
-      
-      #Get QC sample names
-      sample_names <-
-        lapply(data_QC@sampleData$spectraOrigin, basename)
-      
-      #Initiate empty vectors
-      int_std_foundrt <- c()
-      int_std <- c()
-      
-      #Retrieve foundRT of internal standards in QC's
-      for (j in 1:dim(internal_standards_rt)[1]) {
-        rt_list = list()
-        int_list = list()
-        x_list = list()
-        y_list = list()
+      if(rt_alignment == TRUE){
+        #Get the ranges for the internal standard compounds
         
         
+        internal_standards_rt <- rtRanges[which(dbData$ID %in% int_std_id),]
+        internal_standards_mz <- mzRanges[which(dbData$ID %in% int_std_id),]
         
-        for (i in 1:length(sample_names)) {
-          sample_name <- unlist(sample_names[i])
+        #Get QC sample names
+        sample_names <-
+          lapply(data_QC@sampleData$spectraOrigin, basename)
+        
+        
+        #Initiate empty vectors
+        int_std_foundrt <- c()
+        int_std <- c()
+        
+        #Retrieve foundRT of internal standards in QC's
+        for (j in 1:dim(internal_standards_rt)[1]) {
+          rt_list = list()
+          int_list = list()
+          x_list = list()
+          y_list = list()
           
-          #extraction of rt & int with chromatograms (slow)
-          # chromatograms <-
-          #   chromatogram(data_QC, rt = rtRanges[j, ], mz = mzRanges[j, ],aggregationFun = "max")
-          # rt <- chromatograms@.Data[[i]]@rtime
-          # int <- chromatograms@.Data[[i]]@intensity
-          
-          #extraction of rt & int using spectra (fast, but diff results??)
           
           
-          .sum_intensities <- function(x, ...) {
-            if (nrow(x)) {
-              cbind(mz = NA_real_,
-                    intensity = sum(x[, "intensity"], na.rm = TRUE))
-            } else
-              cbind(mz = NA_real_, intensity = NA_real_)
+          for (i in 1:length(sample_names)) {
+            sample_name <- unlist(sample_names[i])
+            
+            #extraction of rt & int with chromatograms (slow)
+            # chromatograms <-
+            #   chromatogram(data_QC, rt = rtRanges[j, ], mz = mzRanges[j, ],aggregationFun = "max")
+            # rt <- chromatograms@.Data[[i]]@rtime
+            # int <- chromatograms@.Data[[i]]@intensity
+            
+            #extraction of rt & int using spectra (fast, but diff results??)
+            
+            
+            .sum_intensities <- function(x, ...) {
+              if (nrow(x)) {
+                cbind(mz = NA_real_,
+                      intensity = sum(x[, "intensity"], na.rm = TRUE))
+              } else
+                cbind(mz = NA_real_, intensity = NA_real_)
+            }
+            
+            sample_spectra <-
+              filterDataOrigin(spectra_QC, unique(dataOrigin(spectra_QC))[i])
+            sample_spectra <-
+              filterRt(sample_spectra, internal_standards_rt[j,])
+            sample_spectra <-
+              filterMzRange(sample_spectra, internal_standards_mz[j,])
+            
+            sfs_agg <-
+              addProcessing(sample_spectra, .sum_intensities)
+            eic <-
+              cbind(rtime(sfs_agg),
+                    unlist(intensity(sfs_agg), use.names = FALSE))
+            
+            
+            
+            
+            rt <- eic[, 1]
+            int <- eic[, 2]
+            
+            int[which(is.na(int))] = 0
+            
+            smoothed <- sgolayfilt(int, p = 3, n = 7)
+            
+            border <- find_peak_points(rt, smoothed,dbData$tr[j])
+            
+            int_std_foundrt <- cbind(int_std_foundrt, border[[3]])
+            
           }
           
-          sample_spectra <-
-            filterDataOrigin(spectra_QC, unique(dataOrigin(spectra_QC))[i])
-          sample_spectra <-
-            filterRt(sample_spectra, internal_standards_rt[j,])
-          sample_spectra <-
-            filterMzRange(sample_spectra, internal_standards_mz[j,])
-          
-          sfs_agg <-
-            addProcessing(sample_spectra, .sum_intensities)
-          eic <-
-            cbind(rtime(sfs_agg),
-                  unlist(intensity(sfs_agg), use.names = FALSE))
-          
-          
-          
-          
-          rt <- eic[, 1]
-          int <- eic[, 2]
-          
-          int[which(is.na(int))] = 0
-          
-          smoothed <- sgolayfilt(int, p = 3, n = 7)
-          
-          border <- find_peak_points(rt, smoothed,dbData$tr[j])
-          
-          int_std_foundrt <- cbind(int_std_foundrt, border[[3]])
-          
+          int_std <- rbind(int_std,int_std_foundrt)
+          int_std_foundrt <- c()
         }
         
-        int_std <- rbind(int_std,int_std_foundrt)
-        int_std_foundrt <- c()
+        
+        # rtmed <- dbData$tr
+        # param <- ObiwarpParam(binSize = 0.1,subset = which(sampleData(data_batch)$sample_type == "QC"))
+        # rts <- as.matrix(cbind(rtmed,rtmed,rtmed,rtmed))
+        # internal_standards <- rts[c(19,32,30,33,31),]
+        
+        #Define parameters for retention time adjustment, based on the QC's and the internal standards
+        param <- PeakGroupsParam(minFraction = 0.9,span = 0.5  ,peakGroupsMatrix = int_std, subset = which(sampleData(data_batch)$sample_type == "QC"))
+        
+        #Adjust the RT
+        data_batch <- adjustRtime(data_batch, param = param)
+        #Apply the adjusted RT 
+        data_batch <- applyAdjustedRtime(data_batch)
       }
-      
-
-      # rtmed <- dbData$tr
-      # param <- ObiwarpParam(binSize = 0.1,subset = which(sampleData(data_batch)$sample_type == "QC"))
-      # rts <- as.matrix(cbind(rtmed,rtmed,rtmed,rtmed))
-      # internal_standards <- rts[c(19,32,30,33,31),]
-      
-      #Define parameters for retention time adjustment, based on the QC's and the internal standards
-      param <- PeakGroupsParam(minFraction = 0.9, peakGroupsMatrix = int_std, subset = which(sampleData(data_batch)$sample_type == "QC"))
-      
-      #Adjust the RT
-      data_batch <- adjustRtime(data_batch, param = param)
-      #Apply the adjusted RT 
-      data_batch <- applyAdjustedRtime(data_batch)
-      
       
       #Now, we try and find ALL compounds in the QC samples and save their foundRT to search the compounds at that RT in the sample files
       
       
       data_QC <- data_batch[which(sampleData(data_batch)$sample_type == "QC")]
-      
-      # start <- Sys.time()
-      # data_QC <-
-      #   readMsExperiment(
-      #     spectraFiles = QC_files,
-      #     backend = MsBackendMzR(),
-      #     BPPARAM = SnowParam(workers = 1)
-      #   )
-      #data_QC <- Spectra(QC_files, source = MsBackendMzR())
-      # stop <- Sys.time()
-      # elapsed <- stop - start
-      
-      #Added RT adjustment
-      # data_QC <- adjustRtime(data_QC,param = ObiwarpParam(binSize = 1))
-      # data_QC <- applyAdjustedRtime(data_QC)
       
       sample_names <-
         lapply(data_QC@sampleData$spectraOrigin, basename)
@@ -215,20 +206,7 @@ tardis_peaks <-
     
       
       spectra <- data_QC@spectra
-      # 
-      # pks <- cbind(mzRanges,rtRanges)
-      # 
-      # colnames(pks) <- c("mzmin", "mzmax", "rtmin" , "rtmax")
-      # 
-      # res <- manualChromPeaks(data_batch, pks)
-      # 
-      # 
-      # chromPeaks(res)
-      # 
-      # 
-      # pdp <- PeakDensityParam(sampleGroups = sampleData(res)$sample_type,
-      #                         minFraction = 0.4, bw = 30)
-      # res <- groupChromPeaks(res, param = pdp)
+ 
       
       for (j in 1:dim(rtRanges)[1]) {
         rt_list = list()
@@ -522,6 +500,18 @@ tardis_peaks <-
           )
         }
         
+        if (diagnostic_plots == TRUE){
+          plotDiagnostic(
+            compound_info,
+            output_directory,
+            rt_list,
+            int_list,
+            x_list,
+            y_list,
+            batchnr,
+            sample_names
+          )
+        }
       }
     }
     
@@ -532,7 +522,11 @@ tardis_peaks <-
       select(Component, Sample, AUC) %>%
       spread(Sample, AUC)
     
-    avg_metrics_table <- results %>%
+    #sumarrize feature table based on QC's
+    
+    QC_results <-  results[grep("QC",results$Sample),]
+    
+    avg_metrics_table <- QC_results %>%
       group_by(Component) %>%
       summarise_at(vars(-Sample), list( ~ if (is.numeric(.))
         mean(., na.rm = TRUE)
@@ -592,7 +586,7 @@ tardis_peaks <-
     }
     
     # Save the Excel workbook to a file
-    saveWorkbook(wb, paste0(output_directory, "feat_table.xlsx"))
+    saveWorkbook(wb, paste0(output_directory, "feat_table.xlsx"),overwrite = TRUE)
     
     return(list(auc_table, avg_metrics_table))
   }
