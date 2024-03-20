@@ -37,7 +37,7 @@ tardis_peaks <-
       )
     
     #List files in directory
-    files <- list.files(file_path, full.names = T, pattern = "mzML")
+    files <- list.files(file_path, full.names = T, pattern = "mzML|mzXML")
     
     #Select polarity, mode, ppm & deltaTR
     polarity <-
@@ -517,6 +517,8 @@ tardis_peaks <-
     
     
     results <- results_samples
+    
+    #AUC table for each component peak in every sample
     
     auc_table <- results %>%
       select(Component, Sample, AUC) %>%

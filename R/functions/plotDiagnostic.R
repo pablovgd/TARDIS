@@ -17,7 +17,7 @@ plotDiagnostic <- function(compound_info,output_directory,rt_list,int_list,x_lis
     int_list <- int_list[QCs]
     x_list <- x_list[QCs]
     y_list <- y_list[QCs]
-    
+    sample_names <- sample_names[QCs]
   }
   
 
@@ -73,7 +73,7 @@ plotDiagnostic <- function(compound_info,output_directory,rt_list,int_list,x_lis
   legend(
     "topright",
     inset=c(-0.45, 0),
-    legend = unlist(sample_names[grep("QC",sample_names)]),
+    legend = unlist(sample_names),
     col = rt_int_colors,
     lty = c(1, 1, 1, 1),
     pch = c(1, 16, 1, 16),
