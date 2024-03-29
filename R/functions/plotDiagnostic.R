@@ -17,9 +17,11 @@ plotDiagnostic <- function(compound_info,output_directory,rt_list,int_list,x_lis
     int_list <- int_list[QCs]
     x_list <- x_list[QCs]
     y_list <- y_list[QCs]
+    sample_names <- sample_names[grep("QC",sample_names)]
     sample_names <- sample_names[QCs]
+  } else{
+    sample_names <- sample_names[grep("QC",sample_names)]
   }
-  
 
   
   c25 <- palette36.colors(length(rt_list))
