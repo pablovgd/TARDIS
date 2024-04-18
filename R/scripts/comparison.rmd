@@ -586,41 +586,41 @@ source(file = "R/functions/plotSamples.R")
 source(file = "R/functions/manualchrompeaks_fix.R")
 source(file = "R/functions/peaks_with_tardis.R")
 source(file = "R/functions/plotDiagnostic.R")
-c
+
 
 
 start <- Sys.time()
 
 dbData <-
   createTargetList(
-    input_directory_targets = "D:/Data/PANIC_saliva/positive/targets.xlsx",
+    input_directory_targets = "D:/Data/PANIC_saliva/negative/targets.xlsx",
     pos_pattern = "+",
     neg_pattern = "-",
-    polarity = 'positive',
+    polarity = 'negative',
     ion_column = "ion",
     columns_of_interest = c("id", "name", "mz", "rt")
   )
 
-batch_positions = list(c(1, 208), c(209, 416))
+batch_positions = list(c(1, 208), c(209, 417))
 #batch_positions = list(c(1,24),c(25,48))
 #batch_positions = list(c(1,263),c(264,612),c(613,681))
 
 
 #int_std_id_metabease_pos = c("331","1578","1576","1583","1577")
-int_std_id_panic_pos = c("331","1578","1576","1583","1577")
+#int_std_id_panic_pos = c("331","1578","1576","1583","1577")
 #int_std_id_fame_pos  = c("331","1578","1577","1576","1579")
-#int_std_id_fame_neg  = c("1577", "1576", "1579")
+int_std_id_fame_neg  = c("1577", "1576", "1579")
 
 
 result <-
   tardis_peaks(
-    file_path = "D:/Data/PANIC_saliva/positive/",
+    file_path = "D:/Data/PANIC_saliva/negative/",
     dbData = dbData,
     ppm = 5,
     rtdev = 18,
     mode = "metabolomics" ,
-    polarity = "positive",
-    output_directory =  "D:/Data/PANIC_saliva/positive/",
+    polarity = "negative",
+    output_directory =  "D:/Data/PANIC_saliva/negative/",
     plots_samples = FALSE,
     plots_QC = FALSE,
     diagnostic_plots = TRUE,
