@@ -1,4 +1,4 @@
-find_true_occurrence <- function(vector, point) {
+find_true_occurrence <- function(signs,vector,point) {
   left_true <- NA
   right_true <- NA
   
@@ -8,24 +8,24 @@ find_true_occurrence <- function(vector, point) {
   
  
 
-  # Search for TRUE to the left
+  # Search for TRUE to the left --> if sign changes and at least doens't change at the next point 
   for (i in (point - 1):1) {
-    if (vector[i] == TRUE) {
+    if (signs[i] == TRUE &&  point - i > 2) {
       left_true <- i
       break
-    }
+    } else{ left_true <- 1}
   }
   
-  if(point >= length(vector)){
-    point = length(vector) -1
+  if(point >= length(signs)){
+    point = length(signs) -1
   }
   
   # Search for TRUE to the right
-  for (i in (point + 1):length(vector)) {
-    if (vector[i] == TRUE) {
+  for (i in (point + 1):length(signs)) {
+    if (signs[i] == TRUE && i - point > 2) {
       right_true <- i
       break
-    }
+    } else{ right_true <- length(vector)}
   }
   
   result <- list(left_true = left_true, right_true = right_true)
@@ -58,7 +58,7 @@ find_peak_points <- function(rtvector, vector, searchrt) {
   }
   
   
-  # Find the max intensity closest to the searchrt
+  # Find the max intensity closest to the searchrt which is at least 50% of the max intensity in the window
   
   maxrts <- rtvector[c(peak_index,local_max)]
   
@@ -70,8 +70,8 @@ find_peak_points <- function(rtvector, vector, searchrt) {
   
   peak_index <- which(rtvector == maxrts[closest_position])
   
-  # Find the left and right points from the peak
-  occur <- find_true_occurrence(sign_changes,peak_index)
+  # Find the left and right border points from the peak
+  occur <- find_true_occurrence(sign_changes,vector,peak_index)
   
   if(is.na(occur$left_true)){
     occur$left_true = 1
