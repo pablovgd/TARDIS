@@ -593,7 +593,7 @@ start <- Sys.time()
 
 dbData <-
   createTargetList(
-    input_directory_targets = "D:/Data/Optim_exploris_kimberly/targets_KDW.xlsx",
+    input_directory_targets = "D:/Data/Optim_exploris_kimberly/Lipid/targets_KDW_lipid.xlsx",
     pos_pattern = "+",
     neg_pattern = "-",
     polarity = 'positive',
@@ -601,7 +601,7 @@ dbData <-
     columns_of_interest = c("id", "name", "mz", "rt")
   )
 
-batch_positions = list(c(1, 29))
+batch_positions = list(c(1, 28))
 #batch_positions = list(c(1,24),c(25,48))
 #batch_positions = list(c(1,263),c(264,612),c(613,681))
 
@@ -616,13 +616,14 @@ int_std_kimberly_neg <- c("ID1579")
 
 result <-
   tardis_peaks(
-    file_path = "D:/Data/Optim_exploris_kimberly/positive/",
+    file_path = "D:/Data/Optim_exploris_kimberly/Lipid/04_Lipid_RSM/positive/",
     dbData = dbData,
     ppm = 5,
     rtdev = 18,
-    mode = "metabolomics" ,
+    mode = "lipidomics" ,
+    mass_range = c(67,1000),
     polarity = "positive",
-    output_directory =  "D:/Data/Optim_exploris_kimberly/positive/",
+    output_directory =  "D:/Data/Optim_exploris_kimberly/Lipid/04_Lipid_RSM/positive/",
     plots_samples = FALSE,
     plots_QC = FALSE,
     diagnostic_plots = TRUE,

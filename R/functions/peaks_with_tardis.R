@@ -4,6 +4,7 @@ tardis_peaks <-
            ppm,
            rtdev,
            mode,
+           mass_range,
            polarity,
            output_directory,
            plots_samples,
@@ -53,10 +54,21 @@ tardis_peaks <-
     ppm <-
       ppm #ppm error for EIC extraction #POLAR = 5ppm / LIPIDOMICS =  10 ppm
     
+    mass_range <-
+      mass_range
+    
     deltaTR <- rtdev
     
     #save compound info
+    if(mode == "lipidomics"){
+      dbData <- dbData[which(dbData$`m/z` < mass_range[2] & dbData$`m/z` > mass_range[1]),]
+    }
+    
+    
     info_compounds <- dbData
+    
+    
+    
     
     if (screening_mode == TRUE) {
       #select all qc's
@@ -67,7 +79,16 @@ tardis_peaks <-
         backend = MsBackendMzR(),
         BPPARAM = SnowParam(workers = 1)
       )
-      spectra_QC <- data_QC@spectra
+      
+      if(mode == "lipidomics"){
+        spectra_QC <- data_QC@spectra
+        spectra_QC <- filterMzRange(spectra_QC,mass_range)
+        spectra_QC <- filterEmptySpectra(spectra_QC)
+      } else{spectra_QC <- data_QC@spectra}
+      
+      
+      
+      
       #Create ranges for all compounds
       ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
       #Get mz & rt ranges
@@ -165,8 +186,13 @@ tardis_peaks <-
       }
       
       #Find all targets in x QC's
+      if(mode == "lipidomics"){
+        spectra_QC <- data_QC@spectra
+        spectra_QC <- filterMzRange(spectra_QC,mass_range)
+        spectra_QC <- filterEmptySpectra(spectra_QC)
+      } else{spectra_QC <- data_QC@spectra}
       
-      spectra<- data_QC@spectra
+      spectra<- spectra_QC
       
       
       for (j in 1:dim(rtRanges)[1]) {
@@ -357,7 +383,11 @@ tardis_peaks <-
         data_QC <-
           data_batch[which(sampleData(data_batch)$sample_type == "QC")]
         #Extract spectra
-        spectra_QC <- data_QC@spectra
+        if(mode == "lipidomics"){
+          spectra_QC <- data_QC@spectra
+          spectra_QC <- filterMzRange(spectra_QC,mass_range)
+          spectra_QC <- filterEmptySpectra(spectra_QC)
+        } else{spectra_QC <- data_QC@spectra}
         #Create ranges for all compounds
         ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
         #Get mz & rt ranges
@@ -470,8 +500,13 @@ tardis_peaks <-
           
           
           
-          spectra <- data_QC@spectra
+          if(mode == "lipidomics"){
+            spectra_QC <- data_QC@spectra
+            spectra_QC <- filterMzRange(spectra_QC,mass_range)
+            spectra_QC <- filterEmptySpectra(spectra_QC)
+          } else{spectra_QC <- data_QC@spectra}
           
+          spectra <- spectra_QC
           
           for (j in 1:dim(rtRanges)[1]) {
             rt_list = list()
@@ -646,8 +681,13 @@ tardis_peaks <-
         mzRanges <- ranges[[1]]
         rtRanges <- ranges[[2]]
         
-        spectra <- data_samples@spectra
         
+        if(mode == "lipidomics"){
+          spectra <- data_samples@spectra
+          spectra <- filterMzRange(spectra,mz = mass_range)
+          spectra <- filterEmptySpectra(spectra)
+        } else{spectra <- data_samples@spectra}
+
         for (j in 1:dim(rtRanges)[1]) {
           rt_list = list()
           int_list = list()
@@ -668,6 +708,8 @@ tardis_peaks <-
               filterRt(sample_spectra, rtRanges[j,])
             sample_spectra <-
               filterMzRange(sample_spectra, mzRanges[j,])
+            
+          
             
             sfs_agg <-
               addProcessing(sample_spectra, .sum_intensities)
