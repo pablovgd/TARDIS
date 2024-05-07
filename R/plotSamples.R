@@ -38,7 +38,9 @@ plot_title <- paste("Component:", compound_info$ID)
 sub <- compound_info$NAME
 plot_file <-
   paste("Component_", compound_info$ID, ".png", sep = "")
-dir.create(paste0(output_directory, "Samplebatch_", batchnr))
+if(dir.exists(paste0(output_directory, "Samplebatch_", batchnr)) == FALSE){
+  dir.create(paste0(output_directory, "Samplebatch_", batchnr))
+}
 png(filename = file.path(
   paste0(output_directory, "Samplebatch_", batchnr),
   plot_file
@@ -70,7 +72,7 @@ mapply(function(rt,
   #abline(v = x[1], col = rt_int_color)
   #abline(v = tail(x, 1), col = rt_int_color)
   #points(rt, int, col = rt_int_color)     # Points for rt and int
-  
+
 },
 rt_list,
 int_list,

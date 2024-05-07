@@ -9,19 +9,19 @@ plotDiagnostic <-
            batchnr,
            sample_names) {
     # Define colors for rt,int pairs and x,y pairs
-    
-    
-    
+
+
+
     if(length(grep("QC", sample_names)) != 0){
       #Select only the  QC's for plotting
       rt_list <- rt_list[grep("QC", sample_names)]
       int_list <- int_list[grep("QC", sample_names)]
       x_list <- x_list[grep("QC", sample_names)]
       y_list <- y_list[grep("QC", sample_names)]
-      
-      
+
+
       #Select 5 relevant QC's from beginning middle and end of the batch
-      
+
       if (length(rt_list) > 5) {
         QCs <-
           unique(round(seq(
@@ -38,15 +38,18 @@ plotDiagnostic <-
       } else{
         sample_names <- sample_names[grep("QC", sample_names)]
       }
-      
-      
+
+
       c25 <- RColorBrewer::brewer.pal(n = length(rt_list), "Set1")
-      
+
       plot_title <- paste("Component:", compound_info$ID)
       sub <- compound_info$NAME
       plot_file <-
         paste("Component_", compound_info$ID, ".png", sep = "")
-      dir.create(paste0(output_directory, "QCbatch_", batchnr))
+      if(dir.exists(paste0(output_directory, "QCbatch_", batchnr)) == FALSE){
+
+        dir.create(paste0(output_directory, "QCbatch_", batchnr))
+       }
       png(filename = file.path(paste0(output_directory, "QCbatch_", batchnr),
                                plot_file))
       par(mar = c(5.1, 4.1, 4.1, 10.1), xpd = TRUE)
@@ -60,7 +63,7 @@ plotDiagnostic <-
         xlab = "rt",
         ylab = "int"
       )
-      
+
       rt_int_colors <-
         c25[1:length(rt_list)] # You can add more colors as needed
       # You can add more colors as needed
@@ -84,7 +87,7 @@ plotDiagnostic <-
           col = adjustcolor(rt_int_color, alpha.f = 0.3),
           border = NA
         )
-        
+
       },
       rt_list,
       int_list,
@@ -92,7 +95,7 @@ plotDiagnostic <-
       y_list,
       rt_int_color = rt_int_colors)
       # x_y_color = x_y_colors)
-      
+
       legend(
         "topright",
         inset = c(-0.45, 0),
@@ -103,33 +106,35 @@ plotDiagnostic <-
         cex = 0.7,
         title = "Sample",
         title.cex = 0.8
-        
+
       )
-      
+
       dev.off()
-    
+
     }else{
-      
-      chunk_size <- 5 
+
+      chunk_size <- 5
       num_chunks <- ceiling(length(rt_list) / chunk_size)
       for(i in 1:num_chunks){
-        
+
         start_index <- (i - 1) * chunk_size + 1
         end_index <- min(i * chunk_size, length(rt_list))
-     
+
         rt_list_chunk  <- rt_list[start_index:end_index]
         int_list_chunk  <- int_list[start_index:end_index]
         x_list_chunk  <- x_list[start_index:end_index]
         y_list_chunk  <- y_list[start_index:end_index]
-        
+
         c25 <- RColorBrewer::brewer.pal(n = length(rt_list_chunk), "Set1")
-        
-        
+
+
         plot_title <- paste("Component:", compound_info$ID)
         sub <- compound_info$NAME
         plot_file <-
           paste("Component_", compound_info$ID, ".png", sep = "")
-        dir.create(paste0(output_directory, "evalbatch_", batchnr,i))
+        if(dir.exists(paste0(output_directory, "evalbatch_", batchnr,i)) == FALSE){
+          dir.create(paste0(output_directory, "evalbatch_", batchnr,i))
+        }
         png(filename = file.path(paste0(output_directory, "evalbatch_", batchnr,i),
                                  plot_file))
         par(mar = c(5.1, 4.1, 4.1, 10.1), xpd = TRUE)
@@ -143,7 +148,7 @@ plotDiagnostic <-
           xlab = "rt",
           ylab = "int"
         )
-        
+
         rt_int_colors <-
           c25[1:length(rt_list_chunk)] # You can add more colors as needed
         # You can add more colors as needed
@@ -167,7 +172,7 @@ plotDiagnostic <-
             col = adjustcolor(rt_int_color, alpha.f = 0.3),
             border = NA
           )
-          
+
         },
         rt_list_chunk,
         int_list_chunk,
@@ -175,7 +180,7 @@ plotDiagnostic <-
         y_list_chunk,
         rt_int_color = rt_int_colors)
         # x_y_color = x_y_colors)
-        
+
         legend(
           "topright",
           inset = c(-0.45, 0),
@@ -186,16 +191,16 @@ plotDiagnostic <-
           cex = 0.7,
           title = "Sample",
           title.cex = 0.8
-          
+
         )
-        
+
         dev.off()
-      
-      
+
+
       }
-      
-      
-      
+
+
+
     }
-      
+
   }
