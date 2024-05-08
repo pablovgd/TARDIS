@@ -9,6 +9,9 @@
 #' @param polarity Indicates the polarity, can be either "negative" or "positive"
 #' @param columns_of_interest Column names of the columns with information that need to be included, can be as many as needed, but needs to include "ID","Name","m/z-value" and "RT (min)"
 #'
+#' @importFrom readxl read_xlsx
+#' @importFrom stringr str_ends
+#'
 #' @return A dataframe containing the targeted compounds
 #' @export
 #'
