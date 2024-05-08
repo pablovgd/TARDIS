@@ -1,10 +1,10 @@
-ui <- page_navbar(
+ui <- bslib::page_navbar(
 
   shinyjs::useShinyjs(),  # Initialize shinyjs
-  title = div(img(src="/tardis.png",width =100)),
+  title = div(img(src="tardis.png",height=100,width =100)),
   bg = "#003B6F",
   inverse = TRUE,
-  nav_panel(title = "Create target list",
+  bslib::nav_panel(title = "Create target list",
             p(
               column(width = 6,
                      fileInput("target_file", "Table with target compounds (.csv or .xlsx):", accept = c(".xlsx",".csv")),
@@ -16,16 +16,16 @@ ui <- page_navbar(
                      actionButton("create_target_list", "Create Target List")
               )
             )),
-  nav_panel(title = "Targeted peak detection",
-            page_fillable(
-              layout_columns(
-                card(
-                  shinyDirButton("dir", "Enter data folder path:",title ="directory "),
+  bslib::nav_panel(title = "Targeted peak detection",
+            bslib::page_fillable(
+              bslib::layout_columns(
+                bslib::card(
+                  shinyFiles::shinyDirButton("dir", "Enter data folder path:",title ="directory "),
                   textOutput("selectedDir"),
-                  shinyDirButton("dir_out", "Enter output folder path:",title ="directory out"),
+                  shinyFiles::shinyDirButton("dir_out", "Enter output folder path:",title ="directory out"),
                   textOutput("selectedDirOut")
                 ),
-                card(
+                bslib::card(
                   numericInput("ppm", "PPM:", value = 5),
                   selectInput("mode", "Mode:", choices = c("metabolomics","lipidomics")),
                   uiOutput("mass_low"),
@@ -36,7 +36,7 @@ ui <- page_navbar(
                   textInput("sample_pattern", "Sample pattern:", value = ""),
                   textInput("QC_pattern", "QC pattern:", value = "QC")
                 ),
-                card(
+                bslib::card(
                   checkboxInput("diagnostic_plots", "Generate diagnostic plots", value = TRUE),
                   checkboxInput("plot_samples", "Generate sample plots", value = FALSE),
                   checkboxInput("plot_QCs", "Generate QC plots", value = FALSE),
@@ -45,7 +45,7 @@ ui <- page_navbar(
                   checkboxInput("rt_alignment", "RT alignment", value = TRUE),
                   checkboxInput("smoothing", "Smoothing", value = TRUE)
                 ),
-                card(
+                bslib::card(
                   actionButton("run_tardis_peaks", "Run T.A.R.D.I.S."),
 
 

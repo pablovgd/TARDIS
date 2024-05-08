@@ -2,14 +2,14 @@ server <- function(input, output, session) {
 
   shinyjs::useShinyjs()  # Initialize shinyjs
 
-  volumes = getVolumes()()
+  volumes = shinyFiles::getVolumes()()
 
 
-  shinyDirChoose(input, "dir", roots = volumes)
+  shinyFiles::shinyDirChoose(input, "dir", roots = volumes)
 
   output$selectedDir <- renderText({
     if (!is.null(input$dir)) {
-      paste("Selected Directory:", parseDirPath(volumes,input$dir))
+      paste("Selected Directory:", shinyFiles::parseDirPath(volumes,input$dir))
     }
   })
 
@@ -17,11 +17,11 @@ server <- function(input, output, session) {
 
 
 
-  shinyDirChoose(input, "dir_out", roots = volumes)
+  shinyFiles::shinyDirChoose(input, "dir_out", roots = volumes)
 
   output$selectedDirOut <- renderText({
     if (!is.null(input$dir_out)) {
-      paste("Selected Directory:", parseDirPath(volumes,input$dir_out))
+      paste("Selected Directory:", shinyFiles::parseDirPath(volumes,input$dir_out))
     }
   })
 
@@ -74,7 +74,7 @@ server <- function(input, output, session) {
 
     updateActionButton(inputId = "run_tardis_peaks", label = "Processing...")
 
-    show_modal_spinner(
+    shinybusy::show_modal_spinner(
       spin = "double-bounce",
       color = "#003B6F",
       text = "Processing...",
@@ -92,7 +92,7 @@ server <- function(input, output, session) {
 
 
     tardis_output <- tardis_peaks(
-      file_path = parseDirPath(volumes,input$dir),
+      file_path = shinyFiles::parseDirPath(volumes,input$dir),
       dbData = targets$targets,
       ppm = as.numeric(input$ppm),
       rtdev = as.numeric(input$rtdev),
@@ -100,7 +100,7 @@ server <- function(input, output, session) {
       mass_range = c(input$mass_low,input$mass_high),
       screening_mode = input$screening_mode,
       polarity = input$polarity,
-      output_directory = paste0(parseDirPath(volumes,input$dir_out),'/'),
+      output_directory = paste0(shinyFiles::parseDirPath(volumes,input$dir_out),'/'),
       plots_samples = input$plot_samples,
       plots_QC = input$plot_QCs,
       smoothing = input$smoothing,
@@ -114,6 +114,6 @@ server <- function(input, output, session) {
     )
 
 
-    remove_modal_spinner(session = getDefaultReactiveDomain())
+    shinybusy::remove_modal_spinner(session = getDefaultReactiveDomain())
   })
 }

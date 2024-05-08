@@ -5,7 +5,7 @@
 #' @param input_directory_targets Full path to the file containing the database with targeted compounds.
 #' @param pos_pattern Pattern of positive ions to be recognized in  ion_column
 #' @param neg_pattern Pattern of negative ions to be recognized in  ion_column
-#' @param ion_column Name of the column in which the type op ionisation is found
+#' @param ion_column Name of the column in which the type of ionisation is found
 #' @param polarity Indicates the polarity, can be either "negative" or "positive"
 #' @param columns_of_interest Column names of the columns with information that need to be included, can be as many as needed, but needs to include "ID","Name","m/z-value" and "RT (min)"
 #'
