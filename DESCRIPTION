@@ -1,12 +1,34 @@
 Package: TARDIS
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: TArgeted Raw Data Integration In Spectrometry
+Version: 0.1
+Authors@R:
+    person("Pablo", "Vangeenderhuysen", , "pablovangeenderhuysen@ugent.be", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-5492-6904"))
+Description: T.A.R.D.I.S. was created to extract targeted chromatographic
+    peak data from LC-MS experiments. It makes use of the 'Spectra'
+    package in order to be future-proof and exist within the
+    Rformasspectry series of packages.
+License: GPL (>= 3)
+Imports: 
+    BiocParallel (>= 1.37.0),
+    bslib (>= 0.7.0),
+    ggplot2 (>= 3.4.4),
+    jrc (>= 0.6.0),
+    magrittr (>= 2.0.3),
+    MsExperiment (>= 1.5.4),
+    openxlsx (>= 4.2.5.2),
+    pracma (>= 2.4.4),
+    RColorBrewer (>= 1.1.3),
+    readxl (>= 1.4.3),
+    shiny (>= 1.8.0),
+    shinybusy (>= 0.3.3),
+    shinyFiles (>= 0.9.3),
+    shinyjs (>= 2.1.0),
+    signal (>= 1.8.0),
+    Spectra (>= 1.13.4),
+    stringr (>= 1.5.1),
+    tibble (>= 3.2.1),
+    xcms (>= 4.1.8)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
