@@ -22,7 +22,7 @@ createTargetList(
 
 \item{polarity}{Indicates the polarity, can be either "negative" or "positive"}
 
-\item{ion_column}{Name of the column in which the type op ionisation is found}
+\item{ion_column}{Name of the column in which the type of ionisation is found}
 
 \item{columns_of_interest}{Column names of the columns with information that need to be included, can be as many as needed, but needs to include "ID","Name","m/z-value" and "RT (min)"}
 }

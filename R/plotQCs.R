@@ -1,4 +1,18 @@
-### Plotting function for QC's ###
+#' Function to make plots of QC samples
+#'
+#' @param compound_info
+#' @param output_directory
+#' @param rt_list
+#' @param int_list
+#' @param x_list
+#' @param y_list
+#' @param batchnr
+#' @param sample_names
+#'
+#' @import ggplot2
+#' @import RColorBrewer
+
+
 plotQCs <- function(compound_info,output_directory,rt_list,int_list,x_list,y_list,batchnr,sample_names) {
   # Define colors for rt,int pairs and x,y pairs
   c25 <- palette36.colors(length(rt_list))

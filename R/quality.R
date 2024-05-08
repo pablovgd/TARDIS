@@ -1,3 +1,11 @@
+#' qcoreCalculator
+#'
+#' Implementation of the work by William Kumler to calculate quality metrics: https://github.com/wkumler/MS_metrics
+#'
+#' @param rt
+#' @param int
+
+
 qscoreCalculator <- function(rt, int){
   #Check for bogus EICs
   if(length(rt)<5){

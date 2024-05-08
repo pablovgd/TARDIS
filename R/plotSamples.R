@@ -1,3 +1,17 @@
+#' Function to make plots of samples
+#'
+#' @param compound_info
+#' @param output_directory
+#' @param rt_list
+#' @param int_list
+#' @param x_list
+#' @param y_list
+#' @param batchnr
+#' @param sample_names
+#'
+#' @import ggplot2
+#' @import RColorBrewer
+
 plotSamples <- function(compound_info, output_directory,rt_list,int_list,x_list,y_list,batchnr,sample_names){
 
 

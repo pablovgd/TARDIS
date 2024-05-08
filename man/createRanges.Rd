@@ -19,5 +19,5 @@ createRanges(msData, dbData, ppm, rtdev)
 A list containing the m/z and retention time ranges for all given target compounds
 }
 \description{
-Loads a .xlsx or .csv file that contains all the information needed to detect targeted compounds.
+Creates ranges around given m/z and retention time based on given data and allowed deviance.
 }

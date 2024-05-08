@@ -15,7 +15,7 @@
 #' @return A dataframe containing the targeted compounds
 #' @export
 #'
-#' @examples
+
 
 createTargetList <- function(input_directory_targets,pos_pattern,neg_pattern,polarity,ion_column,columns_of_interest){
 

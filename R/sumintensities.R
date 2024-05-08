@@ -1,3 +1,6 @@
+#' Sum Intensities of Spectra
+
+
 .sum_intensities <- function(x, ...) {
   if (nrow(x)) {
     cbind(mz = NA_real_,

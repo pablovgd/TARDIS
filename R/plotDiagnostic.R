@@ -1,4 +1,21 @@
-### Plotting function for QC's ###
+#' Diagnostic plots
+#'
+#' Function to make plots of QC samples to screen peak quality and retention time shifts.
+#'
+#' @param compound_info
+#' @param output_directory
+#' @param rt_list
+#' @param int_list
+#' @param x_list
+#' @param y_list
+#' @param batchnr
+#' @param sample_names
+#'
+#' @import ggplot2
+#' @import RColorBrewer
+
+
+
 plotDiagnostic <-
   function(compound_info,
            output_directory,

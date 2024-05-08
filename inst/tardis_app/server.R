@@ -72,7 +72,7 @@ server <- function(input, output, session) {
   # Function to run tardis_peaks
   observeEvent(input$run_tardis_peaks, {
 
-    updateActionButton(inputId = "run_tardis_peaks", label = "Processing...")
+    updateActionButton(inputId = "run_tardis_peaks", label = "Processing done! You may close this window.")
 
     shinybusy::show_modal_spinner(
       spin = "double-bounce",

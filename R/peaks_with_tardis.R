@@ -1,3 +1,62 @@
+#' T.A.R.D.I.S. Peak Detection
+#'
+#' Main function of the T.A.R.D.I.S. package that is called in the Shiny app.
+#' Given data files and a list of targeted compounds it returns the area of those peaks, optional diagnostic plots and several other parameters.
+#' See vignette for a detailed tutorial.
+#'
+#' @param file_path Path to the .mzML or .mzXML files containing LC-MS data.
+#' @param dbData Output of [createTargetList()]
+#' @param ppm Allowed deviance from given m/z of targets in ppm.
+#' @param rtdev Allowed deviance from given retention time of compound, defines search window for the peak picking algorithm.
+#' @param mode Can be either "metabolomics", one mass range of "lipidomics", multiple mass ranges
+#' @param mass_range If the user uses data with overlapping mass windows, only one mass window at the time can be analyzed, specify this here.
+#' @param polarity Ionisation mode to be considered, can be either "positive" or "negative"
+#' @param output_directory Provide directory to store output
+#' @param plots_samples Create plots for all samples TRUE or FALSE
+#' @param plots_QC Create plots for all QC's TRUE or FALSE
+#' @param diagnostic_plots Create diagnostic plots of 5 QCs spreaded across the analyses
+#' @param batch_mode
+#' @param batch_positions Indicate start and end file of each batch, e.g. list(c(1,20)c(21,40))
+#' @param QC_pattern String with pattern of QC files
+#' @param sample_pattern String with pattern of sample files
+#' @param rt_alignment Align retention time based on internal stand compounds in the QC samples, TRUE or FALSE. Performed using the [adjustRtime()] function from [xcms]
+#' @param int_std_id Provide ID's of internal standard compounds for retention time alignment
+#' @param screening_mode Run the algorithm over 5 QC's to quickly check retention time shifts
+#' @param smoothing Smooth the peaks with [sgolayfilt()], TRUE or FALSE
+#'
+#' @import MsExperiment
+#' @importFrom Spectra MsBackendMzR
+#' @importFrom Spectra filterMzRange
+#' @importFrom Spectra filterEmptySpectra
+#' @importFrom Spectra filterDataOrigin
+#' @importFrom Spectra filterRt
+#' @importFrom Spectra dataOrigin
+#' @importFrom Spectra addProcessing
+#' @importFrom signal sgolayfilt
+#' @importFrom xcms PeakGroupsParam
+#' @importFrom xcms adjustRtime
+#' @importFrom xcms applyAdjustedRtime
+#' @importFrom xcms rtime
+#' @importFrom xcms intensity
+#' @importFrom pracma trapz
+#' @importFrom BiocParallel SnowParam
+#' @importFrom tidyr spread
+#' @importFrom openxlsx createWorkbook
+#' @importFrom openxlsx addWorksheet
+#' @importFrom openxlsx writeData
+#' @importFrom openxlsx addStyle
+#' @importFrom openxlsx createStyle
+#' @importFrom openxlsx saveWorkbook
+#' @importFrom dplyr summarise
+#' @importFrom dplyr summarise_at
+#' @importFrom dplyr group_by
+#' @importFrom dplyr select
+#' @importFrom dplyr first
+#'
+#' @return
+#' @export
+#'
+
 tardis_peaks <-
   function(file_path,
            dbData,
