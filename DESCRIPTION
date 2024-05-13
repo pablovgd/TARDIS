@@ -9,7 +9,7 @@ Description: T.A.R.D.I.S. was created to extract targeted chromatographic
     package in order to be future-proof and exist within the
     Rformasspectry series of packages.
 License: GPL (>= 3)
-Imports: 
+Imports:
     BiocParallel (>= 1.37.0),
     bslib (>= 0.7.0),
     ggplot2 (>= 3.4.4),
@@ -29,6 +29,7 @@ Imports:
     stringr (>= 1.5.1),
     tibble (>= 3.2.1),
     xcms (>= 4.1.8)
+biocViews: Infrastructure, Software, Metabolomics, MassSpectrometry
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
