@@ -2,8 +2,8 @@
 [![R-CMD-check](https://github.com/pablovgd/T.A.R.D.I.S./actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pablovgd/T.A.R.D.I.S./actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-# T.A.R.D.I.S.            
-<img style="float: right;" src="https://github.com/pablovgd/T.A.R.D.I.S./blob/main/www/tardis.png" width="200" height="200">
+# T.A.R.D.I.S. <img src="https://github.com/pablovgd/T.A.R.D.I.S./blob/main/www/tardis.png" width="150" height="150" align = right />        
+
 R package for *TArgeted Raw Data Integration In Spectrometry*
 
 ## Installation
