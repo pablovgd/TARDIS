@@ -81,7 +81,7 @@ Input file looks like this (first 6 rows):
 
 ```{r echo=FALSE}
 library(readxl)
-input <- read_excel("vignettes/vignette_data/targets.xlsx")
+input <- read_excel("vignette_data/targets.xlsx")
 kableExtra::kable(head(input))
 ```
 
@@ -89,7 +89,7 @@ The target `data.frame`  is created:
 
 ```{r}
 
-targets <- createTargetList("vignettes/vignette_data/targets.xlsx",
+targets <- createTargetList("vignette_data/targets.xlsx",
                             pos_pattern = "+",
                             neg_pattern = "-",
                             polarity = "positive",
@@ -136,7 +136,7 @@ Plots below show results for two components in 5 QC runs without RT correction (
 
 ```{r echo=FALSE, alignment1, fig.show='hold', out.width="45%"}
 
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics(
   c("vignette_data/plots/not_aligned_180.png",
@@ -146,7 +146,7 @@ knitr::include_graphics(
 ```
 
 ```{r echo=FALSE, alignment2, fig.show='hold', out.width="45%"}
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics(
   c("vignette_data/plots/not_aligned_181.png",
@@ -168,7 +168,7 @@ An example: in the Figures below, the compound is clearly eluting at a different
 In order to avoid having to manually provide expected RT for every batch, `T.A.R.D.I.S.` will detect that the peak apex is now closer to a RT of 440 seconds (7.3 minutes) and thus when finally processing that batch the expected RT for that compound will be approximately 440 seconds instead of 446 seconds. 
 
 ```{r echo=FALSE, rtshift, fig.show='hold', out.width="45%"}
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics(
   c("vignette_data/plots/rtshift1.png",
@@ -181,7 +181,7 @@ knitr::include_graphics(
 Finally, after setting the new expected RT, peaks are integrated in all samples (and QCs). The user can choose to get plots for all components in all samples and QCs (plotted in groups of 5 samples, see example below).
 
 ```{r echo=FALSE, out.width="45%"}
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics("vignette_data/plots/sample_plot.png")
 ```
@@ -226,7 +226,7 @@ The Shiny GUI will open in an RStudio window or your browser:
 
 
 ```{r echo=FALSE, out.width="60%"}
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics("vignette_data/screenshots/create_list.png")
 ```
@@ -245,7 +245,7 @@ In the tab "Create target list", one can adjust the following parameters:
 Pressing "Create Target List" after filling in the parameter fields will create a target list and pass it through for the next part. 
 
 ```{r echo=FALSE, out.width="60%"}
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics("vignette_data/screenshots/list_created.png")
 ```
@@ -290,13 +290,13 @@ In the tab "Targeted peak detection", one can adjust the following parameters:
 
 
 ```{r echo=FALSE}
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics("vignette_data/screenshots/target_peak_detection.png")
 ```
 
 ```{r echo=FALSE}
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics("vignette_data/screenshots/input.png")
 ```
@@ -304,7 +304,7 @@ knitr::include_graphics("vignette_data/screenshots/input.png")
 During processing, wait patiently:
 
 ```{r echo=FALSE}
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics("vignette_data/screenshots/processing.png")
 ```
@@ -312,7 +312,7 @@ knitr::include_graphics("vignette_data/screenshots/processing.png")
 When processing is finished, a message will appear:
 
 ```{r echo=FALSE}
-setwd("./vignettes/")
+
 par(mar = c(4, 4, .1, .1))
 knitr::include_graphics("vignette_data/screenshots/processing_done.png")
 ```

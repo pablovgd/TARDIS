@@ -30,12 +30,24 @@ devtools::install_github("pablovgd/T.A.R.D.I.S.",build_vignettes = TRUE,
 
 ## Usage
 
+Load the package:
+
+```
+library(TARDIS)
+
+```
+
+
 Read the vignette for a tutorial on how to use `T.A.R.D.I.S.`
+
+```
+RShowDoc("gui_tutorial",package = "TARDIS")
+
+```
 
 To launch the GUI in R:
 
 ```
-library(TARDIS)
 runTardis()
 
 ```
