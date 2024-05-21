@@ -22,7 +22,7 @@ if (!require("devtools", quietly = TRUE))
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-devtools::install_github("pablovgd/T.A.R.D.I.S.",
+devtools::install_github("pablovgd/T.A.R.D.I.S.",build_vignettes = TRUE,
   repos=c('http://cran.us.r-project.org',"http://bioconductor.org/packages/3.19/bioc"),
   dependencies=TRUE, type="source")
 

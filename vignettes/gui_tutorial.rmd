@@ -7,7 +7,11 @@ output:
     toc: true
     toc_float: true
 
-
+vignette: >
+  %\VignetteIndexEntry{Targeted peak integration of LC-MS data using T.A.R.D.I.S.}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  
 ---
 
 ```{r setup, include = FALSE}
