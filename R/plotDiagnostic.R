@@ -63,16 +63,16 @@ plotDiagnostic <-
       sub <- compound_info$NAME
       plot_file <-
         paste("Component_", compound_info$ID, ".png", sep = "")
-      if(dir.exists(paste0(output_directory, "QCbatch_", batchnr)) == FALSE){
+      if(dir.exists(paste0(output_directory, "Diagnostic_QCs_Batch_", batchnr)) == FALSE){
 
-        dir.create(paste0(output_directory, "QCbatch_", batchnr))
+        dir.create(paste0(output_directory, "Diagnostic_QCs_Batch_", batchnr))
        }
-      png(filename = file.path(paste0(output_directory, "QCbatch_", batchnr),
+      png(filename = file.path(paste0(output_directory, "Diagnostic_QCs_Batch_", batchnr),
                                plot_file))
       par(mar = c(5.1, 4.1, 4.1, 10.1), xpd = TRUE)
       plot(
         NULL,
-        xlim = range(unlist(rt_list), unlist(x_list)),
+        xlim = range(unlist(rt_list)/60, unlist(x_list)/60),
         ylim = c(0, max(unlist(int_list), unlist(y_list))),
         type = "n",
         main = plot_title,
@@ -92,14 +92,14 @@ plotDiagnostic <-
                       rt_int_color)
         #x_y_color)
       {
-        lines(rt, int, col = rt_int_color)      # Line plot for rt and int
-        points(rt, int, col = rt_int_color)     # Points for rt and int
+        lines(rt/60, int, col = rt_int_color)      # Line plot for rt and int
+        points(rt/60, int, col = rt_int_color)     # Points for rt and int
         a = x[1] #left integration border
         b = tail(x, 1) #right integration border
         index_a <- which.min(abs(rt - a))
         index_b <- which.min(abs(rt - b))
         polygon(
-          c(rt[index_a], rt[index_a:index_b], rt[index_b]),
+          c(rt[index_a]/60, rt[index_a:index_b]/60, rt[index_b]/60),
           c(0, int[index_a:index_b], 0),
           col = adjustcolor(rt_int_color, alpha.f = 0.3),
           border = NA
@@ -121,7 +121,7 @@ plotDiagnostic <-
         lty = c(1, 1, 1, 1),
         pch = c(1, 16, 1, 16),
         cex = 0.7,
-        title = "Sample",
+        title = "QC",
         title.cex = 0.8
 
       )
@@ -157,7 +157,7 @@ plotDiagnostic <-
         par(mar = c(5.1, 4.1, 4.1, 10.1), xpd = TRUE)
         plot(
           NULL,
-          xlim = range(unlist(rt_list_chunk), unlist(x_list_chunk)),
+          xlim = range(unlist(rt_list_chunk)/60, unlist(x_list_chunk)/60),
           ylim = c(0, max(unlist(int_list_chunk), unlist(y_list_chunk))),
           type = "n",
           main = plot_title,
@@ -177,14 +177,14 @@ plotDiagnostic <-
                         rt_int_color)
           #x_y_color)
         {
-          lines(rt, int, col = rt_int_color)      # Line plot for rt and int
-          points(rt, int, col = rt_int_color)     # Points for rt and int
+          lines(rt/60, int, col = rt_int_color)      # Line plot for rt and int
+          points(rt/60, int, col = rt_int_color)     # Points for rt and int
           a = x[1] #left integration border
           b = tail(x, 1) #right integration border
           index_a <- which.min(abs(rt - a))
           index_b <- which.min(abs(rt - b))
           polygon(
-            c(rt[index_a], rt[index_a:index_b], rt[index_b]),
+            c(rt[index_a]/60, rt[index_a:index_b]/60, rt[index_b]/60),
             c(0, int[index_a:index_b], 0),
             col = adjustcolor(rt_int_color, alpha.f = 0.3),
             border = NA
@@ -206,7 +206,7 @@ plotDiagnostic <-
           lty = c(1, 1, 1, 1),
           pch = c(1, 16, 1, 16),
           cex = 0.7,
-          title = "Sample",
+          title = "QC",
           title.cex = 0.8
 
         )

@@ -23,6 +23,7 @@
 #' @param int_std_id Provide ID's of internal standard compounds for retention time alignment
 #' @param screening_mode Run the algorithm over 5 QC's to quickly check retention time shifts
 #' @param smoothing Smooth the peaks with [sgolayfilt()], TRUE or FALSE
+#' @param max_int_filter Set minimum max intensity of peak to be included in results
 #'
 #' @import MsExperiment
 #' @importFrom Spectra MsBackendMzR
@@ -69,14 +70,15 @@ tardis_peaks <-
            plots_samples,
            plots_QC,
            diagnostic_plots,
-           batch_mode,
+           batch_mode = TRUE,
            batch_positions,
            QC_pattern,
            sample_pattern,
            rt_alignment,
            int_std_id,
            screening_mode,
-           smoothing) {
+           smoothing,
+           max_int_filter) {
     #Create empty dataframe for sample results
     results_samples <-
       data.frame(
@@ -243,7 +245,8 @@ tardis_peaks <-
         #Apply the adjusted RT
         data_QC <- applyAdjustedRtime(data_QC)
       }
-
+      sample_names <-
+        lapply(data_QC@sampleData$spectraOrigin, basename)
       #Find all targets in x QC's
       if(mode == "lipidomics"){
         spectra_QC <- data_QC@spectra
@@ -889,6 +892,10 @@ tardis_peaks <-
 
       results <- results_samples
 
+      if(is.null(max_int_filter) == FALSE ){
+        results <- results[which(results$MaxInt >= max_int_filter),]
+      }
+
       #AUC, int, SNR & peakcor tables for each component peak in every sample
 
       auc_table <- results %>%
@@ -925,7 +932,7 @@ tardis_peaks <-
       write.csv(peakcor_table, file = paste0(output_directory, "peakcor_table.csv"))
 
 
-      #sumarrize feature table based on QC's
+      #summarize feature table based on QC's
 
       avg_metrics_table <- NULL
 
@@ -958,38 +965,7 @@ tardis_peaks <-
                   startCol = 1,
                   startRow = 1)
 
-        # Define colors for formatting
-        color_low <- "#FF7F7F"
-        color_high <- "#90EE90"
-        color_mid <- "#FFD580"
 
-        # Apply conditional formatting based on the values in the "Score" column
-        for (i in 1:nrow(avg_metrics_table)) {
-          score <- avg_metrics_table$peak_cor[i]
-          if (is.na(score) == TRUE) {
-            score = 0
-          }
-
-          if (score < lower_threshold) {
-            addStyle(wb,
-                     sheet,
-                     createStyle(fgFill = color_low) ,
-                     i + 1 ,
-                     1:ncol(avg_metrics_table))
-          } else if (score > upper_threshold) {
-            addStyle(wb,
-                     sheet,
-                     createStyle(fgFill = color_high) ,
-                     i + 1 ,
-                     1:ncol(avg_metrics_table))
-          } else{
-            addStyle(wb,
-                     sheet,
-                     createStyle(fgFill = color_mid) ,
-                     i + 1 ,
-                     1:ncol(avg_metrics_table))
-          }
-        }
 
         # Save the Excel workbook to a file
         saveWorkbook(wb,

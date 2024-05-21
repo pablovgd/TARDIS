@@ -105,12 +105,13 @@ server <- function(input, output, session) {
       plots_QC = input$plot_QCs,
       smoothing = input$smoothing,
       diagnostic_plots = input$diagnostic_plots,
-      batch_mode = input$batch_mode,
+      batch_mode = TRUE,
       batch_positions =  result,
       sample_pattern = input$sample_pattern,
       QC_pattern = input$QC_pattern,
       rt_alignment = input$rt_alignment,
-      int_std_id = unlist(strsplit(input$int_std_id, ","))
+      int_std_id = unlist(strsplit(input$int_std_id, ",")),
+      max_int_filter = input$max_int_filter
     )
 
 

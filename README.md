@@ -8,7 +8,9 @@ R package for *TArgeted Raw Data Integration In Spectrometry*
 
 ## Installation
 Make sure `R` (>=4.4.0) and `Rtools` are installed on your computer:
+
 https://cloud.r-project.org/index.html
+
 https://cran.r-project.org/bin/windows/Rtools/rtools44/rtools.html
 
 In R, run:
@@ -44,4 +46,4 @@ runTardis()
 
 As a summary, the GPLv3 license requires attribution, inclusion of copyright and license information, disclosure of source code and changes. Derivative work must be available under the same terms.
 
-© Pablo Vangeenderhuysen (2023)
+© Pablo Vangeenderhuysen (2024)

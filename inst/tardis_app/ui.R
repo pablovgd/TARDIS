@@ -41,9 +41,10 @@ ui <- bslib::page_navbar(
                   checkboxInput("plot_samples", "Generate sample plots", value = FALSE),
                   checkboxInput("plot_QCs", "Generate QC plots", value = FALSE),
                   checkboxInput("screening_mode", "Screening mode", value = FALSE),
-                  checkboxInput("batch_mode", "Batch mode", value = TRUE),
                   checkboxInput("rt_alignment", "RT alignment", value = TRUE),
-                  checkboxInput("smoothing", "Smoothing", value = TRUE)
+                  checkboxInput("smoothing", "Smoothing", value = TRUE),
+                  numericInput("max_int_filter", "Minimum peak intensity:", value = 10000)
+
                 ),
                 bslib::card(
                   actionButton("run_tardis_peaks", "Run T.A.R.D.I.S."),

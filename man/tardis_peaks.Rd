@@ -16,14 +16,15 @@ tardis_peaks(
   plots_samples,
   plots_QC,
   diagnostic_plots,
-  batch_mode,
+  batch_mode = TRUE,
   batch_positions,
   QC_pattern,
   sample_pattern,
   rt_alignment,
   int_std_id,
   screening_mode,
-  smoothing
+  smoothing,
+  max_int_filter
 )
 }
 \arguments{
@@ -62,6 +63,8 @@ tardis_peaks(
 \item{screening_mode}{Run the algorithm over 5 QC's to quickly check retention time shifts}
 
 \item{smoothing}{Smooth the peaks with \code{\link[=sgolayfilt]{sgolayfilt()}}, TRUE or FALSE}
+
+\item{max_int_filter}{Set minimum max intensity of peak to be included in results}
 }
 \description{
 Main function of the T.A.R.D.I.S. package that is called in the Shiny app.
