@@ -16,6 +16,7 @@ Imports:
     ggplot2 (>= 3.4.4),
     jrc (>= 0.6.0),
     kableExtra (>= 1.4.0),
+    knitr (>= 1.45),
     magrittr (>= 2.0.3),
     MsExperiment (>= 1.5.4),
     openxlsx (>= 4.2.5.2),
