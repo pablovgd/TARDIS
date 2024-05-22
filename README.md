@@ -7,11 +7,20 @@
 R package for *TArgeted Raw Data Integration In Spectrometry*
 
 ## Installation
-Make sure `R` (>=4.4.0) and `Rtools` are installed on your computer:
+Make sure `R` (**version >= 4.4.0**) is installed on your computer:
 
 https://cloud.r-project.org/index.html
 
+For **Windows** users, `Rtools` should be installed as well:
+
 https://cran.r-project.org/bin/windows/Rtools/rtools44/rtools.html
+
+For **Mac** users, please install Xcode and a GNU Fortran compiler, see:
+https://mac.r-project.org/tools/index.html
+For Xcode, you can run this line in your Mac OS terminal:
+```
+sudo xcode-select --install
+```
 
 In R, run:
 
@@ -34,22 +43,19 @@ Load the package:
 
 ```
 library(TARDIS)
-
 ```
 
 
-Read the vignette for a tutorial on how to use `T.A.R.D.I.S.`
+**Read the vignette** for a tutorial on how to use `T.A.R.D.I.S.`
 
 ```
 RShowDoc("gui_tutorial",package = "TARDIS")
-
 ```
 
 To launch the GUI in R:
 
 ```
 runTardis()
-
 ```
 
 ## Copyright
