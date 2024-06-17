@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples
-rename_raw_files <- function(data_path_raw_files,data_path_list){
+renameRawFiles <- function(data_path_raw_files,data_path_list){
 
 
 file_names_original <- list.files(data_path_raw_files)
