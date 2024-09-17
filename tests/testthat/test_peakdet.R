@@ -58,6 +58,11 @@ test_that(".find_peak_points works", {
     ## second peak
     res <- find_peak_points(seq_along(ints), ints, targetRtime = 15)
     expect_equal(res, c(left = 11, right = 19, peak_index = 14))
+    ## 50%
+    ints <- c(4, 3, 5, 5.2, 5.5, 4, 1, 2, 1, 3, 1, 6, 10, 12, 11, 9, 7, 5, 1)
+    ## asking for first peak, getting second
+    res <- find_peak_points(seq_along(ints), ints, targetRtime = 6)
+    expect_equal(res, c(left = 11, right = 19, peak_index = 14))
     
     ## NA in input
     ints[2] <- NA
