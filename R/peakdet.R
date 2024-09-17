@@ -20,7 +20,7 @@
     l <- length(sign_change)
     left_true <- 1L
     right_true <- l
-    if (index == 1) 
+    if (index == 1)
         index <- index + 1
     ## Search for TRUE to the left --> if sign changes and at least doens't
     ## change at the next point
@@ -95,8 +95,8 @@ find_peak_points <- function(rtime = numeric(), intensity = numeric(),
             stop("'targetRtime' is expected to be a single numeric")
     }
     ## Compute the derivative of the vector jo: is here something missing?
-    ## if (anyNA(intensity))
-    ##     intensity <- imputeLinInterpol(intensity)
+    if (anyNA(intensity))
+        intensity <- imputeLinInterpol(intensity)
     di <- diff(intensity)
     sign_changes <- c(FALSE, diff(di > 0) != 0, FALSE) # same length than ints
     peak_index <- which.max(intensity)
