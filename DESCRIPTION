@@ -1,6 +1,6 @@
 Package: TARDIS
 Title: TArgeted Raw Data Integration In Spectrometry
-Version: 0.1.0
+Version: 0.1.1
 Authors@R:
     c(person(given = "Pablo",
              family = "Vangeenderhuysen",
@@ -41,5 +41,5 @@ Suggests:
 biocViews: Infrastructure, Software, Metabolomics, MassSpectrometry
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr

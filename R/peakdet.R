@@ -13,6 +13,8 @@
 #' @return named `numeric(2)` with the left and right index of the border. If
 #'     no local minima were found 1 and `length(sign_change)` are returned.
 #' 
+#' @author Pablo Vangeenderhuysen
+#' 
 #' @noRd
 .find_peak_border <- function(sign_change, index, min_dist = 2) {
     l <- length(sign_change)
