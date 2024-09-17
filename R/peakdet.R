@@ -87,14 +87,16 @@
 find_peak_points <- function(rtime = numeric(), intensity = numeric(),
                              targetRtime = numeric(), .check = TRUE) {
     if (.check) {
+        if (!length(intensity))
+            stop("'intensity' is of length 0")
         if (length(rtime) != length(intensity))
             stop("'rtime' and 'intensity' are expected to have the same length")
         if (length(targetRtime) != 1L)
             stop("'targetRtime' is expected to be a single numeric")
     }
     ## Compute the derivative of the vector jo: is here something missing?
-    if (anyNA(intensity))
-        intensity <- imputeLinInterpol(intensity)
+    ## if (anyNA(intensity))
+    ##     intensity <- imputeLinInterpol(intensity)
     di <- diff(intensity)
     sign_changes <- c(FALSE, diff(di > 0) != 0, FALSE) # same length than ints
     peak_index <- which.max(intensity)
