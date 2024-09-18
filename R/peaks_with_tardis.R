@@ -225,7 +225,8 @@ tardis_peaks <-
             }
 
             #Border detection
-              border <- find_peak_points(rt, smoothed, dbData$tr[j])
+              border <- find_peak_points(rt, smoothed, dbData$tr[j],
+                                         .check = FALSE)
 
             #Save found RT for internal standard target
             int_std_foundrt <-
@@ -306,7 +307,7 @@ tardis_peaks <-
             int[int < 0] <- 0
           }
 
-          border <- find_peak_points(rt, smoothed, dbData$tr[j])
+          border <- find_peak_points(rt, smoothed, dbData$tr[j], .check = FALSE)
           idx <- border[1L]:border[2L]
           x <- rt[idx]
           y <- int[idx]
@@ -521,7 +522,8 @@ tardis_peaks <-
               }
 
               #Border detection
-                border <- find_peak_points(rt, smoothed, dbData$tr[j])
+                border <- find_peak_points(rt, smoothed, dbData$tr[j],
+                                           .check = FALSE)
 
               #Save found RT for internal standard target
               int_std_foundrt <-
@@ -615,7 +617,8 @@ tardis_peaks <-
                 int[int < 0] <- 0
               }
 
-              border <- find_peak_points(rt, smoothed, dbData$tr[j])
+              border <- find_peak_points(rt, smoothed, dbData$tr[j],
+                                         .check = FALSE)
 
               idx <- border[1L]:border[2L]
               x <- rt[idx]
@@ -800,7 +803,8 @@ tardis_peaks <-
               int[int < 0] <- 0
             }
 
-            border <- find_peak_points(rt, smoothed, dbData$tr[j])
+            border <- find_peak_points(rt, smoothed, dbData$tr[j],
+                                       .check = FALSE)
 
             idx <- border[1L]:border[2L]
             x <- rt[idx]

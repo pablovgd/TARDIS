@@ -74,6 +74,11 @@ test_that("find_peak_points works", {
     ints[13] <- NA
     res <- find_peak_points(seq_along(ints), ints, targetRtime = 15)
     expect_equal(res, c(left = 11, right = 19, peak_index = 14))
+
+    ## intensities are constant.
+    ints <- rep(1, 5)
+    res <- find_peak_points(seq_along(ints), ints, 3)
+    expect_equal(res, c(left = 1, right = 5, peak_index = 1))
 })
 
 ################################################################################
@@ -165,4 +170,3 @@ test_that("find_peak_points_orig works", {
     res_b <- find_peak_points(seq_along(ints), ints, 15)
     expect_equal(unname(res), unname(res_b))
 })
-

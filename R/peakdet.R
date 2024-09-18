@@ -94,13 +94,12 @@ find_peak_points <- function(rtime = numeric(), intensity = numeric(),
         if (length(targetRtime) != 1L)
             stop("'targetRtime' is expected to be a single numeric")
     }
-    ## Compute the derivative of the vector jo: is here something missing?
     if (anyNA(intensity))
         intensity <- imputeLinInterpol(intensity)
     di <- diff(intensity)
     sign_changes <- c(FALSE, diff(di > 0) != 0, FALSE) # same length than ints
     peak_index <- which.max(intensity)
-    all_local_max <- which(diff(sign(di)) == -2) + 1
+    all_local_max <- c(peak_index, which(diff(sign(di)) == -2) + 1)
     ## Delete local maxima with an intensity lower than 50% max int
     local_max <- all_local_max[intensity[all_local_max] >
                                0.5 * intensity[peak_index]]
@@ -108,9 +107,7 @@ find_peak_points <- function(rtime = numeric(), intensity = numeric(),
     differences <- abs(rtime[local_max] - targetRtime)
     peak_index <- local_max[which.min(differences)]
     ## Find the left and right border points from the peak
-    border <- find_true_occurrence(sign_changes, intensity, peak_index)
-    ## border <- .find_peak_border(sign_changes, peak_index, min_dist = 3)
-
+    border <- .find_peak_border(sign_changes, peak_index, min_dist = 3)
     c(border, peak_index = peak_index)
 }
 
