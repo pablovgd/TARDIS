@@ -108,7 +108,8 @@ find_peak_points <- function(rtime = numeric(), intensity = numeric(),
     differences <- abs(rtime[local_max] - targetRtime)
     peak_index <- local_max[which.min(differences)]
     ## Find the left and right border points from the peak
-    border <- .find_peak_border(sign_changes, peak_index, min_dist = 3)
+    border <- find_true_occurrence(sign_changes, intensity, peak_index)
+    ## border <- .find_peak_border(sign_changes, peak_index, min_dist = 3)
 
     c(border, peak_index = peak_index)
 }
