@@ -1,10 +1,14 @@
-#' T.A.R.D.I.S. Peak Detection
+#' @title T.A.R.D.I.S. Peak Detection
 #'
+#' @description 
 #' Main function of the T.A.R.D.I.S. package that is called in the Shiny app.
-#' Given data files and a list of targeted compounds it returns the area of those peaks, optional diagnostic plots and several other parameters.
+#' Given data files and a list of targeted compounds it returns the area of
+#' those peaks, optional diagnostic plots and several other parameters.
 #' See vignette for a detailed tutorial.
 #'
-#' @param file_path Path to the .mzML or .mzXML files containing LC-MS data.
+#' @param file_path `character(1)`: path to the .mzML or .mzXML files
+#'     containing LC-MS data.
+#' 
 #' @param dbData Output of [createTargetList()]
 #' @param ppm Allowed deviance from given m/z of targets in ppm.
 #' @param rtdev Allowed deviance from given retention time of compound, defines search window for the peak picking algorithm.
@@ -57,6 +61,10 @@
 #' @return
 #' @export
 #'
+
+## jo: wouldn't it be better to call the function on a data object instead
+## of a file path? The (advanced) user could eventually do some more quality
+## checks on the data before?
 
 tardis_peaks <-
   function(file_path,
@@ -217,11 +225,12 @@ tardis_peaks <-
             }
 
             #Border detection
-            border <- find_peak_points(rt, smoothed, dbData$tr[j])
+              border <- find_peak_points(rt, smoothed, dbData$tr[j],
+                                         .check = FALSE)
 
             #Save found RT for internal standard target
             int_std_foundrt <-
-              cbind(int_std_foundrt, border[[3]]) #this will finally contain all found rts for the different internal standards in this sample
+              cbind(int_std_foundrt, rt[border[3L]]) #this will finally contain all found rts for the different internal standards in this sample
 
           }
 
@@ -298,10 +307,10 @@ tardis_peaks <-
             int[int < 0] <- 0
           }
 
-          border <- find_peak_points(rt, smoothed, dbData$tr[j])
-
-          x <- rt[border$left:border$right]
-          y <- int[border$left:border$right]
+          border <- find_peak_points(rt, smoothed, dbData$tr[j], .check = FALSE)
+          idx <- border[1L]:border[2L]
+          x <- rt[idx]
+          y <- int[idx]
 
           rt_list <- c(rt_list, list(rt))
           int_list <- c(int_list, list(int))
@@ -318,9 +327,6 @@ tardis_peaks <-
             # Calculate QScore
             qscore <- qscoreCalculator(x, y)
 
-            found_rt <- border$foundrt
-            max_int = int[border$peakindex]
-
             # Get information about the current component from info_compounds
             compound_info <- dbData[j,]
 
@@ -331,10 +337,10 @@ tardis_peaks <-
                 Component = compound_info$ID,
                 Sample = sample_name,
                 AUC = auc,
-                MaxInt = max_int,
+                MaxInt = int[border[3L]],
                 SNR = qscore[1],
                 peak_cor = qscore[2],
-                foundRT = found_rt,
+                foundRT = rt[border[3L]],
                 pop = pop,
                 compound_info
               )
@@ -516,11 +522,12 @@ tardis_peaks <-
               }
 
               #Border detection
-              border <- find_peak_points(rt, smoothed, dbData$tr[j])
+                border <- find_peak_points(rt, smoothed, dbData$tr[j],
+                                           .check = FALSE)
 
               #Save found RT for internal standard target
               int_std_foundrt <-
-                cbind(int_std_foundrt, border[[3]]) #this will finally contain all found rts for the different internal standards in this sample
+                cbind(int_std_foundrt, rt[border[3L]]) #this will finally contain all found rts for the different internal standards in this sample
 
             }
 
@@ -610,10 +617,12 @@ tardis_peaks <-
                 int[int < 0] <- 0
               }
 
-              border <- find_peak_points(rt, smoothed, dbData$tr[j])
+              border <- find_peak_points(rt, smoothed, dbData$tr[j],
+                                         .check = FALSE)
 
-              x <- rt[border$left:border$right]
-              y <- int[border$left:border$right]
+              idx <- border[1L]:border[2L]
+              x <- rt[idx]
+              y <- int[idx]
 
               rt_list <- c(rt_list, list(rt))
               int_list <- c(int_list, list(int))
@@ -629,9 +638,6 @@ tardis_peaks <-
                 # Calculate QScore
                 qscore <- qscoreCalculator(x, y)
 
-                found_rt <- border$foundrt
-                max_int = int[border$peakindex]
-
                 # Get information about the current component from info_compounds
                 compound_info <- dbData[j,]
 
@@ -642,10 +648,10 @@ tardis_peaks <-
                     Component = compound_info$ID,
                     Sample = sample_name,
                     AUC = auc,
-                    MaxInt = max_int,
+                    MaxInt = int[border[3L]],
                     SNR = qscore[1],
                     peak_cor = qscore[2],
-                    foundRT = found_rt,
+                    foundRT = rt[border[3L]],
                     pop = pop,
                     compound_info
                   )
@@ -797,10 +803,12 @@ tardis_peaks <-
               int[int < 0] <- 0
             }
 
-            border <- find_peak_points(rt, smoothed, dbData$tr[j])
+            border <- find_peak_points(rt, smoothed, dbData$tr[j],
+                                       .check = FALSE)
 
-            x <- rt[border$left:border$right]
-            y <- int[border$left:border$right]
+            idx <- border[1L]:border[2L]
+            x <- rt[idx]
+            y <- int[idx]
 
             rt_list <- c(rt_list, list(rt))
             int_list <- c(int_list, list(int))
@@ -816,9 +824,6 @@ tardis_peaks <-
               # Calculate QScore
               qscore <- qscoreCalculator(x, y)
 
-              found_rt <- border$foundrt
-              max_int = int[border$peakindex]
-
               # Get information about the current component from info_compounds
               compound_info <- dbData[j,]
 
@@ -829,10 +834,10 @@ tardis_peaks <-
                   Component = compound_info$ID,
                   Sample = sample_name,
                   AUC = auc,
-                  MaxInt = max_int,
+                  MaxInt = int[border[3L]],
                   SNR = qscore[1],
                   peak_cor = qscore[2],
-                  foundRT = found_rt,
+                  foundRT = rt[border[3L]],
                   pop = pop,
                   compound_info
                 )
