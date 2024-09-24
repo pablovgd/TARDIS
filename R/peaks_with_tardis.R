@@ -163,7 +163,7 @@ tardis_peaks <-
           rtRanges[which(dbData$ID %in% int_std_id),]
         internal_standards_mz <-
           mzRanges[which(dbData$ID %in% int_std_id),]
-
+        dbData_std <- dbData[which(dbData$ID %in% int_std_id),]
         #Get QC sample names
         sample_names <-
           lapply(data_QC@sampleData$spectraOrigin, basename)
@@ -217,7 +217,7 @@ tardis_peaks <-
             }
 
             #Border detection
-            border <- find_peak_points(rt, smoothed, dbData$tr[j])
+            border <- find_peak_points(rt, smoothed, dbData_std$tr[j])
 
             #Save found RT for internal standard target
             int_std_foundrt <-
@@ -463,7 +463,7 @@ tardis_peaks <-
             rtRanges[which(dbData$ID %in% int_std_id),]
           internal_standards_mz <-
             mzRanges[which(dbData$ID %in% int_std_id),]
-
+          dbData_std <- dbData[which(dbData$ID %in% int_std_id),]
           #Get QC sample names
           sample_names <-
             lapply(data_QC@sampleData$spectraOrigin, basename)
@@ -516,7 +516,7 @@ tardis_peaks <-
               }
 
               #Border detection
-              border <- find_peak_points(rt, smoothed, dbData$tr[j])
+              border <- find_peak_points(rt, smoothed, dbData_std$tr[j])
 
               #Save found RT for internal standard target
               int_std_foundrt <-
