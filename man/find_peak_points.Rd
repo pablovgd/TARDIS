@@ -2,48 +2,17 @@
 % Please edit documentation in R/peakdet.R
 \name{find_peak_points}
 \alias{find_peak_points}
-\title{Simple peak detection algorithm on chromatographic data}
+\title{Find peak points}
 \usage{
-find_peak_points(
-  rtime = numeric(),
-  intensity = numeric(),
-  targetRtime = numeric(),
-  .check = TRUE
-)
+find_peak_points(rtvector, vector, searchrt)
 }
 \arguments{
-\item{rtime}{\code{numeric} with retention times.}
+\item{rtvector}{Vector with retention times.}
 
-\item{intensity}{\code{numeric} (same length as \code{rtime}) with the signal
-intensities.}
+\item{vector}{Vector with intensities.}
 
-\item{targetRtime}{\code{numeric(1)} with the expected retention time of the
-target peak.}
-
-\item{.check}{\code{logical(1)} whether input parameters should be checked. Use
-\code{.check = FALSE} only if validity of the input parameters was checked
-in an upstream function.}
+\item{searchrt}{Expected retention time of peak.}
 }
 \description{
-Basic peak picking algorithm that finds a targeted chromatographic peak
-given based on retention time and intensities and expected retention time
-of the target signal. The chromatographic signal is expected to contain
-only signal from a single ion. See details below for information on the
-algorithm.
-}
-\details{
-The method:
-\itemize{
-\item identifies first all loacal maxima in \code{intensity}, then
-\item removes local maxima with an intensity lower than 50\% of the maximum
-intensity in \code{intensity} and finally
-\item reports the above defined tentative peak apex with an retenton time
-closest to the provided \code{targetRtime}.
-}
-
-The closest local minima that are at least 2 data points from the apex
-position are reported as the left and right margin of the peak.
-}
-\author{
-Pablo Vangeenderhuysen
+Basic peak picking algorithm that finds a targeted chromatographic peak given the data and expected retention time of the target.
 }

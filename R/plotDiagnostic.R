@@ -1,7 +1,6 @@
 #' Diagnostic plots
 #'
-#' Function to make plots of QC samples to screen peak quality and retention
-#' time shifts.
+#' Function to make plots of QC samples to screen peak quality and retention time shifts.
 #'
 #' @param compound_info
 #' @param output_directory
@@ -26,7 +25,10 @@ plotDiagnostic <-
            y_list,
            batchnr,
            sample_names) {
-    ## Define colors for rt,int pairs and x,y pairs
+    # Define colors for rt,int pairs and x,y pairs
+
+
+
     if(length(grep("QC", sample_names)) != 0){
       #Select only the  QC's for plotting
       rt_list <- rt_list[grep("QC", sample_names)]
@@ -35,7 +37,7 @@ plotDiagnostic <-
       y_list <- y_list[grep("QC", sample_names)]
 
 
-      ##Select 5 relevant QC's from beginning middle and end of the batch
+      #Select 5 relevant QC's from beginning middle and end of the batch
 
       if (length(rt_list) > 5) {
         QCs <-
@@ -147,12 +149,10 @@ plotDiagnostic <-
         sub <- compound_info$NAME
         plot_file <-
           paste("Component_", compound_info$ID, ".png", sep = "")
-        if(dir.exists(paste0(output_directory, "evalbatch_",
-                             batchnr,i)) == FALSE){
+        if(dir.exists(paste0(output_directory, "evalbatch_", batchnr,i)) == FALSE){
           dir.create(paste0(output_directory, "evalbatch_", batchnr,i))
         }
-        png(filename = file.path(paste0(output_directory, "evalbatch_",
-                                        batchnr,i),
+        png(filename = file.path(paste0(output_directory, "evalbatch_", batchnr,i),
                                  plot_file))
         par(mar = c(5.1, 4.1, 4.1, 10.1), xpd = TRUE)
         plot(
