@@ -138,12 +138,20 @@ tardis_peaks <-
           filterEmptySpectra()
       } else{
         spectra_QC <- data_QC@spectra
-      }
-      ## Create ranges for all compounds
-      ranges <- createRanges(data_QC, dbData, ppm, rtdev)
-      ## Get mz & rt ranges
-      mzRanges <- ranges[[1L]]
-      rtRanges <- ranges[[2L]]
+        spectra_QC <- filterMzRange(spectra_QC,mass_range)
+        spectra_QC <- filterEmptySpectra(spectra_QC)
+      } else{spectra_QC <- data_QC@spectra}
+
+      checkScans(spectra_QC)
+
+      #Create ranges for all compounds
+      ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
+      #Get mz & rt ranges
+      mzRanges <- ranges[[1]]
+      rtRanges <- ranges[[2]]
+
+
+
       if (rt_alignment == TRUE) {
         ## Get the ranges for the internal standard compounds
         internal_standards_rt <-
@@ -178,8 +186,11 @@ tardis_peaks <-
             #imputed
             int[which(is.na(int))] = 0
             #To determine the borders more easily, smoothing is applied
-            smoothed <- sgolayfilt(int, p = 3, n = 7)
-            if (smoothing == TRUE) {
+            smoothed <- sgolayfilt(int, p = 3)#, n = 7)
+
+
+            if(smoothing == TRUE){
+
               int <- smoothed
               int[int < 0] <- 0
             }
@@ -331,6 +342,11 @@ tardis_peaks <-
           backend = MsBackendMzR(),
           BPPARAM = SnowParam(workers = 1)
         )
+
+        checkScans(data_batch@spectra)
+
+        #Define study and QC samples --> all not QC files are deemed study files
+
         sampleData(data_batch)$sample_type <- "study"
         sampleData(data_batch)$sample_type[grep(pattern = QC_pattern,
                                                 files_batch)] <- "QC"
