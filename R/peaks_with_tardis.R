@@ -10,19 +10,28 @@
 #'     containing LC-MS data.
 #' @param dbData Output of [createTargetList()]
 #' @param ppm `numeric(1)` Allowed deviance from given m/z of targets in ppm.
-#' @param rtdev `numeric(1)` Allowed deviance from given retention time of compound, defines search window for the peak picking algorithm.
-#' @param mass_range `numeric(2)` If the user uses data with overlapping mass windows, only one mass window at the time can be analyzed, specify this here.
-#' @param polarity `character(1)` Ionisation mode to be considered, can be either "positive" or "negative"
+#' @param rtdev `numeric(1)` Allowed deviance from given retention time of
+#'     compound, defines search window for the peak picking algorithm.
+#' @param mass_range `numeric(2)` If the user uses data with overlapping mass
+#'     windows, only one mass window at the time can be analyzed, specify this
+#'     here.
+#' @param polarity `character(1)` Ionisation mode to be considered, can be
+#'     either "positive" or "negative"
 #' @param output_directory `character(1)` Provide directory to store output
 #' @param plots_samples `logical(1)` Create plots for all samples
 #' @param plots_QC `logical(1)` Create plots for all QCs
-#' @param diagnostic_plots `logical(1)` Create diagnostic plots of 5 QCs spread across the runs
-#' @param batch_positions `list` Indicate start and end file of each batch, e.g. `list(c(1,20),c(21,40))`
+#' @param diagnostic_plots `logical(1)` Create diagnostic plots of 5 QCs
+#'     spread across the runs
+#' @param batch_positions `list` Indicate start and end file of each batch,
+#'     e.g. `list(c(1,20),c(21,40))`
 #' @param QC_pattern `character(1)`  Pattern of QC files
 #' @param sample_pattern `character(1)` Pattern of sample files
-#' @param rt_alignment `logical(1)` Align retention time based on internal stand compounds in the QC samples.
-#' @param int_std_id `character` Provide ID's of internal standard compounds for retention time alignment
-#' @param screening_mode `logical(1)` Run the algorithm over 5 QCs to quickly check retention time shifts
+#' @param rt_alignment `logical(1)` Align retention time based on internal
+#'     standard compounds in the QC samples.
+#' @param int_std_id `character` Provide ID's of internal standard compounds for
+#'     retention time alignment
+#' @param screening_mode `logical(1)` Run the algorithm over 5 QCs to quickly
+#'     check retention time shifts
 #' @param smoothing `logical(1)` Smooth the peaks with [sgolayfilt()],
 #'
 #' @import MsExperiment
@@ -62,22 +71,21 @@
 tardis_peaks <-
   function(file_path,
            dbData,
-           ppm,
-           rtdev,
-           mass_range,
-           polarity,
+           ppm = 5,
+           rtdev = 18,
+           mass_range = c(67,1000),
+           polarity = "positive",
            output_directory,
-           plots_samples,
-           plots_QC,
-           diagnostic_plots,
+           plots_samples = FALSE,
+           plots_QC = FALSE,
+           diagnostic_plots = TRUE,
            batch_positions,
-           QC_pattern,
-           sample_pattern,
-           rt_alignment,
+           QC_pattern = "QC",
+           sample_pattern = "",
+           rt_alignment = TRUE,
            int_std_id,
-           screening_mode,
-           smoothing) {
-    #Create empty dataframe for sample results
+           screening_mode = FALSE,
+           smoothing = TRUE) {
     results_samples <-
       data.frame(
         Component = character(0),
@@ -88,7 +96,6 @@ tardis_peaks <-
         foundRT = numeric(0),
         pop = numeric(0)
       )
-    #Create empty dataframe for QC results
     results_QCs <-
       data.frame(
         Component = character(0),
@@ -99,20 +106,25 @@ tardis_peaks <-
         foundRT = numeric(0),
         pop = numeric(0)
       )
-    #List files in directory
     files <-
       list.files(file_path, full.names = T, pattern = "mzML|mzXML")
-    deltaTR <- rtdev
-    #save compound info
     if (is.null(mass_range) == FALSE) {
       dbData <-
         dbData[which(dbData$`m/z` < mass_range[2] &
                        dbData$`m/z` > mass_range[1]), ]
     }
     info_compounds <- dbData
-
     if (screening_mode == TRUE) {
-      #select all qc's
+      results_screening <-
+        data.frame(
+          Component = character(0),
+          Sample = character(0),
+          AUC = numeric(0),
+          SNR = numeric(0),
+          peak_cor = numeric(0),
+          foundRT = numeric(0),
+          pop = numeric(0)
+        )
       QC_files <-
         files[grep(pattern = QC_pattern, files)]
       data_QC <- MsExperiment::readMsExperiment(
@@ -127,43 +139,38 @@ tardis_peaks <-
       } else{
         spectra_QC <- data_QC@spectra
       }
-
-      #Create ranges for all compounds
-      ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
-      #Get mz & rt ranges
+      ## Create ranges for all compounds
+      ranges <- createRanges(data_QC, dbData, ppm, rtdev)
+      ## Get mz & rt ranges
       mzRanges <- ranges[[1L]]
       rtRanges <- ranges[[2L]]
-
-
       if (rt_alignment == TRUE) {
-        #Get the ranges for the internal standard compounds
+        ## Get the ranges for the internal standard compounds
         internal_standards_rt <-
           rtRanges[which(dbData$ID %in% int_std_id), ]
         internal_standards_mz <-
           mzRanges[which(dbData$ID %in% int_std_id), ]
         dbData_std <- dbData[which(dbData$ID %in% int_std_id), ]
-
-        #Get QC sample names
+        ## Get QC sample names
         sample_names <-
           lapply(data_QC@sampleData$spectraOrigin, basename)
-        #Initiate empty vectors
+        ## Initiate empty vectors
         int_std_foundrt <- c()
         int_std <- c()
-        #Retrieve foundRT of internal standards in QC's, loop over all samples and all internal standards
+        ## Retrieve foundRT of internal standards in QC's,
+        ## loop over all samples and all internal standards
         for (j in 1:dim(internal_standards_rt)[1]) {
           rt_list = list()
           int_list = list()
           x_list = list()
           y_list = list()
           for (i in 1:length(sample_names)) {
-            #get current sample name
             sample_name <- unlist(sample_names[i])
-            #Filter data to get data of sample and the mz and rt range of the current target
-            sample_spectra <- spectra_QC |>
-              filterDataOrigin(unique(dataOrigin(spectra_QC))[i]) |>
-              filterRt(sample_spectra, internal_standards_rt[j, ]) |>
-              filterMzRange(sample_spectra, internal_standards_mz[j, ])
-            eic <- extract_eic(sample_spectra)
+            filtered_spectra <- filterSpectra(spectra_QC,
+                                             unique(dataOrigin(spectra_QC))[i],
+                                             internal_standards_rt[j, ],
+                                             internal_standards_mz[j, ])
+            eic <- extract_eic(filtered_spectra)
             rt <- eic[, 1L]
             int <- eic[, 2L]
             #NA intensities are set to zero --> should change this so only NA's
@@ -183,31 +190,26 @@ tardis_peaks <-
 
             #Save found RT for internal standard target
             int_std_foundrt <-
-              cbind(int_std_foundrt, rt[border[3L]]) #this will finally contain all found rts for the different internal standards in this sample
+              cbind(int_std_foundrt, rt[border[3L]]) #this will finally contain
+              #all found rts for the different internal standards in this sample
           }
 
-
+          ## this will contain all the found rts in all samples
           int_std <-
-            rbind(int_std, int_std_foundrt) #this will contain all the found rt's in all samples
+            rbind(int_std, int_std_foundrt)
           int_std_foundrt <- c()
         }
-
-
-        #Define parameters for retention time adjustment, based on the QC's and the internal standards
+        ## Define parameters for retention time adjustment, based on the QC's
+        ## and the internal standards
         param <-
           PeakGroupsParam(
             minFraction = 0.9,
             span = 0.5  ,
             peakGroupsMatrix = int_std
           )
-
-        #Adjust the RT
         data_QC <- adjustRtime(data_QC, param = param)
-        #Apply the adjusted RT
         data_QC <- applyAdjustedRtime(data_QC)
       }
-      sample_names <-
-        lapply(data_QC@sampleData$spectraOrigin, basename)
       #Find all targets in x QC's
       if (is.null(mass_range) == FALSE) {
         spectra_QC <- data_QC@spectra |>
@@ -216,23 +218,18 @@ tardis_peaks <-
       } else{
         spectra_QC <- data_QC@spectra
       }
-
-      spectra <- spectra_QC
-
-
       for (j in 1:dim(rtRanges)[1]) {
         rt_list = list()
         int_list = list()
         x_list = list()
         y_list = list()
-
         for (i in 1:length(sample_names)) {
           sample_name <- unlist(sample_names[i])
-          sample_spectra <- spectra |>
-            filterDataOrigin(unique(dataOrigin(spectra))[i]) |>
-            filterRt(rtRanges[j, ]) |>
-            filterMzRange(mzRanges[j, ])
-          eic <- extract_eic(sample_spectra)
+          filtered_spectra <- filterSpectra(spectra_QC,
+                                            unique(dataOrigin(spectra_QC))[i],
+                                            rtRanges[j, ],
+                                            mzRanges[j, ])
+          eic <- extract_eic(filtered_spectra)
           rt <- eic[, 1L]
           int <- eic[, 2L]
           int[which(is.na(int))] = 0
@@ -250,20 +247,14 @@ tardis_peaks <-
           int_list <- c(int_list, list(int))
           x_list <- c(x_list, list(x))
           y_list <- c(y_list, list(y))
-
-          # Check if there are at least two unique values for the component
+          ## Check if there are at least two unique values for the component
           if (length(unique(y)) > 1) {
-            # Calculate AUC
             auc <- trapz(x, y)
-            #calculate points over peak
             pop <- length(x)
-            # Calculate QScore
             qscore <- qscoreCalculator(x, y)
-            # Get information about the current component from info_compounds
             compound_info <- dbData[j, ]
-            # Append results to the data frame with compound information
-            results_QCs <- rbind(
-              results_QCs,
+            results_screening <- rbind(
+              results_screening,
               data.frame(
                 Component = compound_info$ID,
                 Sample = sample_name,
@@ -276,13 +267,11 @@ tardis_peaks <-
                 compound_info
               )
             )
-
           } else{
             compound_info <- dbData[j, ]
-
             # Append results to the data frame with compound information
-            results_QCs <- rbind(
-              results_QCs,
+            results_screening <- rbind(
+              results_screening,
               data.frame(
                 Component = compound_info$ID,
                 Sample = sample_name,
@@ -297,9 +286,6 @@ tardis_peaks <-
             )
           }
         }
-
-
-
         # Create and save the plot for the current component
         batchnr = 1
         if (diagnostic_plots == TRUE) {
@@ -315,27 +301,19 @@ tardis_peaks <-
           )
         }
       }
-
-
-
-
-      avg_metrics_table <- results_QCs %>%
+      avg_metrics_table <- results_screening %>%
         group_by(Component) %>%
         summarise_at(vars(-Sample), list(~ if (is.numeric(.))
           mean(., na.rm = TRUE)
           else
             first(.)))
-
       write.csv(avg_metrics_table,
                 file = paste0(output_directory, "qc_screening.csv"))
-
     } else {
-      #Loop over the batches
-
+      ## Loop over the batches
       for (batchnr in 1:length(batch_positions)) {
-        dbData <- info_compounds
-
-        #Empty dataframe for results of the QCs
+        dbData <- info_compounds #need to reset? better to keep updated from
+        # last batch?
         results_QCs_batch <-
           data.frame(
             Component = character(0),
@@ -346,118 +324,69 @@ tardis_peaks <-
             foundRT = numeric(0),
             pop = numeric(0)
           )
-
-        #Select files in the batch
         files_batch <-
           files[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
-
-        #Subselection, only the sample files: use sample pattern if provided, if not, inverse of QC pattern
-
-        if (sample_pattern == "") {
-          sample_files <-
-            files_batch[grep(pattern = QC_pattern, files_batch, invert = TRUE)]
-        } else {
-          sample_files <-
-            files_batch[grep(pattern = sample_pattern, files_batch, invert = FALSE)]
-        }
-        #Subselection, only the QC files
-        QC_files <-
-          files_batch[grep(pattern = QC_pattern, files_batch)]
-
-        #Load all the data for all files in the batch
-
         data_batch <- readMsExperiment(
           spectraFiles = files_batch,
           backend = MsBackendMzR(),
           BPPARAM = SnowParam(workers = 1)
         )
-
-        #Define study and QC samples --> all not QC files are deemed study files
         sampleData(data_batch)$sample_type <- "study"
-        sampleData(data_batch)$sample_type[grep(pattern = QC_pattern, files_batch)] <-
-          "QC"
-
-        #Subselect QC files, first we will locate the peaks of the internal standards in the QC files of this batch to align the rest of the batch data to
-
+        sampleData(data_batch)$sample_type[grep(pattern = QC_pattern,
+                                                files_batch)] <- "QC"
         data_QC <-
           data_batch[which(sampleData(data_batch)$sample_type == "QC")]
-        #Extract spectra
-        if (mode == "lipidomics") {
+        if (is.null(mass_range == FALSE)) {
           spectra_QC <- data_QC@spectra |>
             filterMzRange(mass_range) |>
             filterEmptySpectra()
         } else{
           spectra_QC <- data_QC@spectra
         }
-        #Create ranges for all compounds
-        ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
-        #Get mz & rt ranges
+        ranges <- createRanges(data_QC, dbData, ppm, rtdev)
         mzRanges <- ranges[[1]]
         rtRanges <- ranges[[2]]
-
-
         if (rt_alignment == TRUE) {
-          #Get the ranges for the internal standard compounds
+          ## Get the ranges for the internal standard compounds
           internal_standards_rt <-
             rtRanges[which(dbData$ID %in% int_std_id), ]
           internal_standards_mz <-
             mzRanges[which(dbData$ID %in% int_std_id), ]
           dbData_std <- dbData[which(dbData$ID %in% int_std_id), ]
-
-          #Get QC sample names
           sample_names <-
             lapply(data_QC@sampleData$spectraOrigin, basename)
-
-
-          #Initiate empty vectors
           int_std_foundrt <- c()
           int_std <- c()
-
-          #Retrieve foundRT of internal standards in QC's, loop over all samples and all internal standards
           for (j in 1:dim(internal_standards_rt)[1]) {
             rt_list = list()
             int_list = list()
             x_list = list()
             y_list = list()
             for (i in 1:length(sample_names)) {
-              #get current sample name
               sample_name <- unlist(sample_names[i])
-
-              #Filter data to get data of sample and the mz and rt range of the current target
-              sample_spectra <- spectra_QC |>
-                filterDataOrigin(unique(dataOrigin(spectra_QC))[i]) |>
-                filterRt(internal_standards_rt[j, ]) |>
-                filterMzRange(internal_standards_mz[j, ])
-              eic <- extract_eic(sample_spectra)
+              spectra_filtered <- filterSpectra(spectra_QC,
+                unique(dataOrigin(spectra_QC))[i],
+                internal_standards_rt[j, ],
+                internal_standards_mz[j, ])
+              eic <- extract_eic(spectra_filtered)
               rt <- eic[, 1L]
               int <- eic[, 2L]
-              #NA intensties are set to zero
               int[which(is.na(int))] = 0
-              #To determine the borders more easily, smoothing is applied
               smoothed <- sgolayfilt(int, p = 3, n = 7)
               if (smoothing == TRUE) {
                 int <- smoothed
                 int[int < 0] <- 0
               }
-              #Border detection
               border <-
                 find_peak_points(rt, smoothed, dbData_std$tr[j],
                                  .check = FALSE)
-
-              #Save found RT for internal standard target
               int_std_foundrt <-
-                cbind(int_std_foundrt, rt[border[3L]]) #this will finally contain all found rts for the different internal standards in this sample
-
+                cbind(int_std_foundrt, rt[border[3L]])
             }
-
-
             int_std <-
-              rbind(int_std, int_std_foundrt) #this will contain all the found rt's in all samples
+              rbind(int_std, int_std_foundrt)
             int_std_foundrt <- c()
           }
-
-
-          #Define parameters for retention time adjustment, based on the QC's and the internal standards
           param <-
             PeakGroupsParam(
               minFraction = 0.9,
@@ -465,28 +394,17 @@ tardis_peaks <-
               peakGroupsMatrix = int_std,
               subset = which(sampleData(data_batch)$sample_type == "QC")
             )
-
-          #Adjust the RT
           data_batch <- adjustRtime(data_batch, param = param)
-          #Apply the adjusted RT
           data_batch <- applyAdjustedRtime(data_batch)
         }
-
-
-
-        #Now, we try and find ALL compounds in the QC samples and save their foundRT to search the compounds at that RT in the sample files
-        #Skip this step if there aren't any QC's available.
-
-
+        ## Now, we try and find ALL compounds in the QC samples and save their
+        ## foundRT to search the compounds at that RT in the sample files
+        ## Skip this step if there aren't any QC's available.
         data_QC <-
           data_batch[which(sampleData(data_batch)$sample_type == "QC")]
-
         if (length(data_QC) != 0) {
           sample_names <-
             lapply(data_QC@sampleData$spectraOrigin, basename)
-
-
-
           if (is.null(mass_range) == FALSE) {
             spectra_QC <- data_QC@spectra |>
               filterMzRange(mass_range) |>
@@ -494,9 +412,6 @@ tardis_peaks <-
           } else{
             spectra_QC <- data_QC@spectra
           }
-
-          spectra <- spectra_QC
-
           for (j in 1:dim(rtRanges)[1]) {
             rt_list = list()
             int_list = list()
@@ -504,11 +419,11 @@ tardis_peaks <-
             y_list = list()
             for (i in 1:length(sample_names)) {
               sample_name <- unlist(sample_names[i])
-              sample_spectra <- spectra |>
-                filterDataOrigin(unique(dataOrigin(spectra))[i]) |>
-                filterRt(rtRanges[j, ]) |>
-                filterMzRange(mzRanges[j, ])
-              eic <- extract_eic(sample_spectra)
+              filtered_spectra <- filterSpectra(spectra_QC,
+                                          unique(dataOrigin(spectra_QC))[i],
+                                          rtRanges[j, ],
+                                          mzRanges[j,])
+              eic <- extract_eic(filtered_spectra)
               rt <- eic[, 1L]
               int <- eic[, 2L]
               int[which(is.na(int))] = 0
@@ -526,17 +441,11 @@ tardis_peaks <-
               int_list <- c(int_list, list(int))
               x_list <- c(x_list, list(x))
               y_list <- c(y_list, list(y))
-
-              # Check if there are at least two unique values for the component
               if (length(unique(y)) > 1) {
-                # Calculate AUC
                 auc <- trapz(x, y)
                 pop <- length(x)
-                # Calculate QScore
                 qscore <- qscoreCalculator(x, y)
-                # Get information about the current component from info_compounds
                 compound_info <- dbData[j, ]
-                # Append results to the data frame with compound information
                 results_QCs_batch <- rbind(
                   results_QCs_batch,
                   data.frame(
@@ -554,8 +463,6 @@ tardis_peaks <-
 
               } else{
                 compound_info <- dbData[j, ]
-
-                # Append results to the data frame with compound information
                 results_QCs_batch <- rbind(
                   results_QCs_batch,
                   data.frame(
@@ -572,7 +479,6 @@ tardis_peaks <-
                 )
               }
             }
-            # Create and save the plot for the current component
             if (plots_QC == TRUE) {
               plotQCs(
                 compound_info,
@@ -585,59 +491,37 @@ tardis_peaks <-
                 sample_names
               )
             }
-
           }
-
           results_QCs <- rbind(results_QCs, results_QCs_batch)
-
-
-          # Replace rtmed with average foundRT from previous results
-
+          ## Replace rtmed with average foundRT from previous results
           new_rt_avg <- results_QCs_batch %>%
             group_by(ID) %>%
             summarise(mean = mean(foundRT), na.rm = TRUE)
-
           dbData <- merge(dbData, new_rt_avg, by = "ID")
-
           dbData$trold <- dbData$tr
           dbData$tr <- new_rt_avg$mean
-
-          #If no RT is found, restore old RT
-
+          ## If no RT is found, restore old RT
           for (k in 1:dim(dbData[1])) {
             if (is.na(dbData$tr[k]) == TRUE) {
               dbData$tr[k] <- dbData$trold[k]
             }
           }
-
         }
-        #Next do the whole analysis for the samples in the same batch of the
-        #QC's to find ALL the compounds at the corrected RT. (SAMPLES + QC)
-
-
-        # data_samples <-
-        #   readMsExperiment(
-        #     spectraFiles = sample_files,
-        #     backend = MsBackendMzR(),
-        #     BPPARAM = SnowParam(workers = 1)
-        #   )
-
-        #Get sample data
-        data_samples <- data_batch
+        ## Next do the whole analysis for the samples in the same batch of the
+        ## QC's to find ALL the compounds at the corrected RT. (SAMPLES + QC)
+        ## Get sample data
         sample_names <-
-          lapply(data_samples@sampleData$spectraOrigin, basename)
+          lapply(data_batch@sampleData$spectraOrigin, basename)
         #Create ranges around new RT
-        ranges <- createRanges(data_samples, dbData, ppm, deltaTR)
+        ranges <- createRanges(data_batch, dbData, ppm, rtdev)
         mzRanges <- ranges[[1]]
         rtRanges <- ranges[[2]]
-
-
         if (is.null(mass_range) == FALSE) {
-          spectra <- data_samples@spectra |>
+          spectra <- data_batch@spectra |>
             filterMzRange(mz = mass_range) |>
             filterEmptySpectra()
         } else{
-          spectra <- data_samples@spectra
+          spectra <- data_batch@spectra
         }
 
         for (j in 1:dim(rtRanges)[1]) {
@@ -645,17 +529,14 @@ tardis_peaks <-
           int_list = list()
           x_list = list()
           y_list = list()
-
           for (i in 1:length(sample_names)) {
             sample_name <- unlist(sample_names[i])
-
-
-            sample_spectra <- spectra |>
-              filterDataOrigin(unique(dataOrigin(spectra))[i]) |>
-              filterRt(sample_spectra, rtRanges[j, ]) |>
-              filterMzRange(sample_spectra, mzRanges[j, ])
-            eic <- extract_eic(sample_spectra)
-            eic <- eic[which(duplicated(eic[, 1]) == FALSE), ] #why is this here?
+            spectra_filtered <- filterSpectra(spectra,
+                                              unique(dataOrigin(spectra))[i],
+                                              rtRanges[j, ],
+                                              mzRanges[j, ])
+            eic <- extract_eic(spectra_filtered)
+            eic <- eic[which(duplicated(eic[, 1]) == FALSE), ]#why is this here?
             rt <- eic[, 1L]
             int <- eic[, 2L]
             int[which(is.na(int))] = 0
@@ -673,20 +554,12 @@ tardis_peaks <-
             int_list <- c(int_list, list(int))
             x_list <- c(x_list, list(x))
             y_list <- c(y_list, list(y))
-
             # Check if there are at least two unique values for the component
             if (length(unique(y)) > 1) {
-              # Calculate AUC
               auc <- trapz(x, y)
-
               pop <- length(x)
-              # Calculate QScore
               qscore <- qscoreCalculator(x, y)
-
-              # Get information about the current component from info_compounds
               compound_info <- dbData[j, ]
-
-              # Append results to the data frame with compound information
               results_samples <- rbind(
                 results_samples,
                 data.frame(
@@ -704,8 +577,6 @@ tardis_peaks <-
 
             } else{
               compound_info <- dbData[j, ]
-
-              # Append results to the data frame with compound information
               results_samples <- rbind(
                 results_samples,
                 data.frame(
@@ -723,8 +594,6 @@ tardis_peaks <-
             }
 
           }
-          # Create and save the plot for the current component
-
           if (plots_samples == TRUE) {
             plotSamples(
               compound_info,
@@ -737,7 +606,6 @@ tardis_peaks <-
               sample_names
             )
           }
-
           if (diagnostic_plots == TRUE) {
             plotDiagnostic(
               compound_info,
