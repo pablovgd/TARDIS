@@ -147,8 +147,7 @@ tardis_peaks <-
         spectra_QC <- filterEmptySpectra(spectra_QC)
       } else{spectra_QC <- data_QC@spectra}
 
-
-
+      checkScans(spectra_QC)
 
       #Create ranges for all compounds
       ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
@@ -208,7 +207,7 @@ tardis_peaks <-
             int[which(is.na(int))] = 0
 
             #To determine the borders more easily, smoothing is applied
-            smoothed <- sgolayfilt(int, p = 3, n = 7)
+            smoothed <- sgolayfilt(int, p = 3)#, n = 7)
 
 
             if(smoothing == TRUE){
@@ -434,6 +433,8 @@ tardis_peaks <-
           backend = MsBackendMzR(),
           BPPARAM = SnowParam(workers = 1)
         )
+
+        checkScans(data_batch@spectra)
 
         #Define study and QC samples --> all not QC files are deemed study files
         sampleData(data_batch)$sample_type <- "study"
