@@ -28,8 +28,7 @@ tardis_peaks(
 )
 }
 \arguments{
-\item{file_path}{\code{character(1)}: path to the .mzML or .mzXML files
-containing LC-MS data.}
+\item{file_path}{Path to the .mzML or .mzXML files containing LC-MS data.}
 
 \item{dbData}{Output of \code{\link[=createTargetList]{createTargetList()}}}
 
@@ -69,7 +68,6 @@ containing LC-MS data.}
 }
 \description{
 Main function of the T.A.R.D.I.S. package that is called in the Shiny app.
-Given data files and a list of targeted compounds it returns the area of
-those peaks, optional diagnostic plots and several other parameters.
+Given data files and a list of targeted compounds it returns the area of those peaks, optional diagnostic plots and several other parameters.
 See vignette for a detailed tutorial.
 }
