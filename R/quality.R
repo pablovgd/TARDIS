@@ -1,11 +1,13 @@
-#' qcoreCalculator
+#' @title qcoreCalculator
+#' @description
+#' Implementation of the work by William Kumler to calculate quality metrics:
+#'  https://github.com/wkumler/MS_metrics
 #'
-#' Implementation of the work by William Kumler to calculate quality metrics: https://github.com/wkumler/MS_metrics
+#' @param rt `numeric` vector with retention times
+#' @param int `numeric` vector with corresponding intensities
+#' @author William Kumler
 #'
-#' @param rt
-#' @param int
-
-
+#' @export
 qscoreCalculator <- function(rt, int){
   #Check for bogus EICs
   if(length(rt)<5){
@@ -13,7 +15,6 @@ qscoreCalculator <- function(rt, int){
   }
   #Calculate where each rt would fall on a beta dist (accounts for missed scans)
   scaled_rts <- (rt-min(rt))/(max(rt)-min(rt))
-
   # Create a couple different skews and test fit
   maybe_skews <- c(2.5,3,4,5) #Add 7 to catch more multipeaks and more noise
   #Add 2 to catch very slopey peaks and more noise
@@ -22,8 +23,6 @@ qscoreCalculator <- function(rt, int){
   }))]
   perf_peak <- dbeta(scaled_rts, shape1 = best_skew, shape2 = 5)
   peak_cor <- cor(perf_peak, int)
-
-
   #Calculate the normalized residuals
   residuals <- int/max(int)-perf_peak/max(perf_peak)
   #Calculate the minimum SD, after normalizing for any shape discrepancy

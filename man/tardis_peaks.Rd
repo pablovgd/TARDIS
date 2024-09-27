@@ -7,24 +7,21 @@
 tardis_peaks(
   file_path,
   dbData,
-  ppm,
-  rtdev,
-  mode,
-  mass_range,
-  polarity,
+  ppm = 5,
+  rtdev = 18,
+  mass_range = c(67, 1000),
+  polarity = "positive",
   output_directory,
-  plots_samples,
-  plots_QC,
-  diagnostic_plots,
-  batch_mode = TRUE,
+  plots_samples = FALSE,
+  plots_QC = FALSE,
+  diagnostic_plots = TRUE,
   batch_positions,
-  QC_pattern,
-  sample_pattern,
-  rt_alignment,
+  QC_pattern = "QC",
+  sample_pattern = "",
+  rt_alignment = TRUE,
   int_std_id,
-  screening_mode,
-  smoothing,
-  max_int_filter
+  screening_mode = FALSE,
+  smoothing = TRUE
 )
 }
 \arguments{
@@ -33,39 +30,48 @@ containing LC-MS data.}
 
 \item{dbData}{Output of \code{\link[=createTargetList]{createTargetList()}}}
 
-\item{ppm}{Allowed deviance from given m/z of targets in ppm.}
+\item{ppm}{\code{numeric(1)} Allowed deviance from given m/z of targets in ppm.}
 
-\item{rtdev}{Allowed deviance from given retention time of compound, defines search window for the peak picking algorithm.}
+\item{rtdev}{\code{numeric(1)} Allowed deviance from given retention time of
+compound, defines search window for the peak picking algorithm.}
 
-\item{mode}{Can be either "metabolomics", one mass range of "lipidomics", multiple mass ranges}
+\item{mass_range}{\code{numeric(2)} If the user uses data with overlapping mass
+windows, only one mass window at the time can be analyzed, specify this
+here.}
 
-\item{mass_range}{If the user uses data with overlapping mass windows, only one mass window at the time can be analyzed, specify this here.}
+\item{polarity}{\code{character(1)} Ionisation mode to be considered, can be
+either "positive" or "negative"}
 
-\item{polarity}{Ionisation mode to be considered, can be either "positive" or "negative"}
+\item{output_directory}{\code{character(1)} Provide directory to store output}
 
-\item{output_directory}{Provide directory to store output}
+\item{plots_samples}{\code{logical(1)} Create plots for all samples}
 
-\item{plots_samples}{Create plots for all samples TRUE or FALSE}
+\item{plots_QC}{\code{logical(1)} Create plots for all QCs}
 
-\item{plots_QC}{Create plots for all QC's TRUE or FALSE}
+\item{diagnostic_plots}{\code{logical(1)} Create diagnostic plots of 5 QCs
+spread across the runs}
 
-\item{diagnostic_plots}{Create diagnostic plots of 5 QCs spreaded across the analyses}
+\item{batch_positions}{\code{list} Indicate start and end file of each batch,
+e.g. \code{list(c(1,20),c(21,40))}}
 
-\item{batch_positions}{Indicate start and end file of each batch, e.g. list(c(1,20)c(21,40))}
+\item{QC_pattern}{\code{character(1)}  Pattern of QC files}
 
-\item{QC_pattern}{String with pattern of QC files}
+\item{sample_pattern}{\code{character(1)} Pattern of sample files}
 
-\item{sample_pattern}{String with pattern of sample files}
+\item{rt_alignment}{\code{logical(1)} Align retention time based on internal
+standard compounds in the QC samples.}
 
-\item{rt_alignment}{Align retention time based on internal stand compounds in the QC samples, TRUE or FALSE. Performed using the \code{\link[=adjustRtime]{adjustRtime()}} function from \link{xcms}}
+\item{int_std_id}{\code{character} Provide ID's of internal standard compounds for
+retention time alignment}
 
-\item{int_std_id}{Provide ID's of internal standard compounds for retention time alignment}
+\item{screening_mode}{\code{logical(1)} Run the algorithm over 5 QCs to quickly
+check retention time shifts}
 
-\item{screening_mode}{Run the algorithm over 5 QC's to quickly check retention time shifts}
-
-\item{smoothing}{Smooth the peaks with \code{\link[=sgolayfilt]{sgolayfilt()}}, TRUE or FALSE}
-
-\item{max_int_filter}{Set minimum max intensity of peak to be included in results}
+\item{smoothing}{\code{logical(1)} Smooth the peaks with \code{\link[=sgolayfilt]{sgolayfilt()}},}
+}
+\value{
+returns \code{list} with auc table and feature table with summarized
+stats per compound. Outputs plots and other tables to output folder.
 }
 \description{
 Main function of the T.A.R.D.I.S. package that is called in the Shiny app.

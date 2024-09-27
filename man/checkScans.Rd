@@ -10,5 +10,10 @@ checkScans(spectra)
 \item{spectra}{\code{Spectra} object}
 }
 \description{
-Check if any samples are missing spectra
+Display error if they do.
+Currently stops if a sample is detected that has less than 90\% of the mean
+of spectra in all samples.
+}
+\author{
+Pablo Vangeenderhuysen
 }

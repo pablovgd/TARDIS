@@ -3,3 +3,6 @@
 ## Changes in 0.1.1
 
 - Refactor `find_peak_points()` and add unit tests and documentation.
+- General improvement of code readability and documentation.
+- Get correct rt of ISTD for RT alignment
+- New function `checkScans()` to check faulty input files that miss scans. 

@@ -1,22 +1,22 @@
-#' Diagnostic plots
-#'
+#' @title Diagnostic plots
+#' @description
 #' Function to make plots of QC samples to screen peak quality and retention
 #' time shifts.
 #'
-#' @param compound_info
-#' @param output_directory
-#' @param rt_list
-#' @param int_list
-#' @param x_list
-#' @param y_list
-#' @param batchnr
-#' @param sample_names
+#' @param compound_info info for target compounds like name, id, ...
+#' @param output_directory `character(1)` directory to save plots.
+#' @param rt_list `list` list with retention times of complete window.
+#' @param int_list `list` list with intensities in complete window.
+#' @param x_list `list` list with retention times of integrated peak.
+#' @param y_list `list` list with intensities of integrated peak.
+#' @param batchnr `numeric(1)` batch number.
+#' @param sample_names names of samples.
 #'
 #' @import ggplot2
-#' @import RColorBrewer
-
-
-
+#' @importFrom RColorBrewer brewer.pal
+#'
+#' @author Pablo Vangeenderhuysen
+#' @export
 plotDiagnostic <-
   function(compound_info,
            output_directory,
@@ -33,10 +33,7 @@ plotDiagnostic <-
       int_list <- int_list[grep("QC", sample_names)]
       x_list <- x_list[grep("QC", sample_names)]
       y_list <- y_list[grep("QC", sample_names)]
-
-
       ##Select 5 relevant QC's from beginning middle and end of the batch
-
       if (length(rt_list) > 5) {
         QCs <-
           unique(round(seq(
@@ -53,20 +50,18 @@ plotDiagnostic <-
       } else{
         sample_names <- sample_names[grep("QC", sample_names)]
       }
-
-
-      c25 <- RColorBrewer::brewer.pal(n = length(rt_list), "Set1")
-
+      c25 <- brewer.pal(n = length(rt_list), "Set1")
       plot_title <- paste("Component:", compound_info$ID)
       sub <- compound_info$NAME
       plot_file <-
         paste("Component_", compound_info$ID, ".png", sep = "")
-      if(dir.exists(paste0(output_directory, "Diagnostic_QCs_Batch_", batchnr)) == FALSE){
+      if(dir.exists(paste0(output_directory, "Diagnostic_QCs_Batch_",
+                           batchnr)) == FALSE){
 
         dir.create(paste0(output_directory, "Diagnostic_QCs_Batch_", batchnr))
        }
-      png(filename = file.path(paste0(output_directory, "Diagnostic_QCs_Batch_", batchnr),
-                               plot_file))
+      png(filename = file.path(paste0(output_directory, "Diagnostic_QCs_Batch_",
+                                      batchnr),plot_file))
       par(mar = c(5.1, 4.1, 4.1, 10.1), xpd = TRUE)
       plot(
         NULL,
@@ -78,7 +73,6 @@ plotDiagnostic <-
         xlab = "rt",
         ylab = "int"
       )
-
       rt_int_colors <-
         c25[1:length(rt_list)] # You can add more colors as needed
       # You can add more colors as needed
@@ -102,7 +96,6 @@ plotDiagnostic <-
           col = adjustcolor(rt_int_color, alpha.f = 0.3),
           border = NA
         )
-
       },
       rt_list,
       int_list,
@@ -110,7 +103,6 @@ plotDiagnostic <-
       y_list,
       rt_int_color = rt_int_colors)
       # x_y_color = x_y_colors)
-
       legend(
         "topright",
         inset = c(-0.45, 0),
@@ -121,11 +113,8 @@ plotDiagnostic <-
         cex = 0.7,
         title = "QC",
         title.cex = 0.8
-
       )
-
       dev.off()
-
     }else{
 
       chunk_size <- 5
@@ -165,7 +154,6 @@ plotDiagnostic <-
           xlab = "rt",
           ylab = "int"
         )
-
         rt_int_colors <-
           c25[1:length(rt_list_chunk)] # You can add more colors as needed
         # You can add more colors as needed
@@ -189,7 +177,6 @@ plotDiagnostic <-
             col = adjustcolor(rt_int_color, alpha.f = 0.3),
             border = NA
           )
-
         },
         rt_list_chunk,
         int_list_chunk,
@@ -197,7 +184,6 @@ plotDiagnostic <-
         y_list_chunk,
         rt_int_color = rt_int_colors)
         # x_y_color = x_y_colors)
-
         legend(
           "topright",
           inset = c(-0.45, 0),
@@ -208,16 +194,8 @@ plotDiagnostic <-
           cex = 0.7,
           title = "QC",
           title.cex = 0.8
-
         )
-
         dev.off()
-
-
       }
-
-
-
     }
-
   }

@@ -14,21 +14,29 @@ createTargetList(
 )
 }
 \arguments{
-\item{input_directory_targets}{Full path to the file containing the database with targeted compounds.}
+\item{input_directory_targets}{Full path to the file containing the database
+with targeted compounds.}
 
 \item{pos_pattern}{Pattern of positive ions to be recognized in  ion_column}
 
 \item{neg_pattern}{Pattern of negative ions to be recognized in  ion_column}
 
-\item{polarity}{Indicates the polarity, can be either "negative" or "positive"}
+\item{polarity}{Indicates the polarity, can be either "negative" or
+"positive"}
 
 \item{ion_column}{Name of the column in which the type of ionisation is found}
 
-\item{columns_of_interest}{Column names of the columns with information that need to be included, can be as many as needed, but needs to include "ID","Name","m/z-value" and "RT (min)"}
+\item{columns_of_interest}{Column names of the columns with information that
+need to be included, can be as many as needed, but needs to include "ID",
+"Name","m/z-value" and "RT (min)"}
 }
 \value{
 A dataframe containing the targeted compounds
 }
 \description{
-Loads a .xlsx or .csv file that contains all the information needed to detect targeted compounds.
+Loads a .xlsx or .csv file that contains all the information needed to detect
+targeted compounds.
+}
+\author{
+Pablo Vangeenderhuysen
 }

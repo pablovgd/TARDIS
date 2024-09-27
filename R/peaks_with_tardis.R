@@ -58,7 +58,9 @@
 #' @importFrom dplyr select
 #' @importFrom dplyr first
 #'
-#' @return
+#' @return returns `list` with auc table and feature table with summarized
+#'     stats per compound. Outputs plots and other tables to output folder.
+#'
 #' @export
 #'
 

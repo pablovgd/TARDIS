@@ -12,9 +12,9 @@
 #'
 #' @return named `numeric(2)` with the left and right index of the border. If
 #'     no local minima were found 1 and `length(sign_change)` are returned.
-#' 
+#'
 #' @author Pablo Vangeenderhuysen
-#' 
+#'
 #' @noRd
 .find_peak_border <- function(sign_change, index, min_dist = 2) {
     l <- length(sign_change)
@@ -45,7 +45,7 @@
 #' @title Simple peak detection algorithm on chromatographic data
 #'
 #' @description
-#' 
+#'
 #' Basic peak picking algorithm that finds a targeted chromatographic peak
 #' given based on retention time and intensities and expected retention time
 #' of the target signal. The chromatographic signal is expected to contain
@@ -64,25 +64,24 @@
 #'
 #' The closest local minima that are at least 2 data points from the apex
 #' position are reported as the left and right margin of the peak.
-#' 
+#'
 #' @param rtime `numeric` with retention times.
-#' 
+#'
 #' @param intensity `numeric` (same length as `rtime`) with the signal
 #'     intensities.
-#' 
+#'
 #' @param targetRtime `numeric(1)` with the expected retention time of the
 #'     target peak.
 #'
 #' @param .check `logical(1)` whether input parameters should be checked. Use
 #'     `.check = FALSE` only if validity of the input parameters was checked
-#'     in an upstream function. 
-#' 
+#'     in an upstream function.
+#'
 #' @author Pablo Vangeenderhuysen
-#' 
-#' @return
+#'
 #'
 #' @importFrom xcms imputeLinInterpol
-#' 
+#'
 #' @export
 find_peak_points <- function(rtime = numeric(), intensity = numeric(),
                              targetRtime = numeric(), .check = TRUE) {
@@ -103,11 +102,11 @@ find_peak_points <- function(rtime = numeric(), intensity = numeric(),
     ## Delete local maxima with an intensity lower than 50% max int
     local_max <- all_local_max[intensity[all_local_max] >
                                0.5 * intensity[peak_index]]
-    ## Find the local maximum closest to the targetRtime 
+    ## Find the local maximum closest to the targetRtime
     differences <- abs(rtime[local_max] - targetRtime)
     peak_index <- local_max[which.min(differences)]
     ## Find the left and right border points from the peak
-    border <- .find_peak_border(sign_changes, peak_index, min_dist = 3)
+    border <- .find_peak_border(sign_changes, peak_index, min_dist = 2)
     c(border, peak_index = peak_index)
 }
 
@@ -149,9 +148,6 @@ find_true_occurrence <- function(signs,vector,point) {
 #' @param rtvector Vector with retention times.
 #' @param vector Vector with intensities.
 #' @param searchrt Expected retention time of peak.
-
-#' @return
-#' @export
 #'
 find_peak_points_orig <- function(rtvector, vector, searchrt) {
   # Compute the derivative of the vector
@@ -183,6 +179,6 @@ find_peak_points_orig <- function(rtvector, vector, searchrt) {
     occur[2L] = length(vector)
   }
     c(occur, peakindex = peak_index)
-    
+
   ## return(list(left = occur$left_true, right = occur$right_true,foundrt = rtvector[peak_index],peakindex = peak_index))
 }
