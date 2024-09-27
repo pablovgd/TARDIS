@@ -147,7 +147,7 @@ tardis_peaks <-
         spectra_QC <- filterEmptySpectra(spectra_QC)
       } else{spectra_QC <- data_QC@spectra}
 
-
+      checkScans(spectra_QC)
 
 
       #Create ranges for all compounds
@@ -434,7 +434,7 @@ tardis_peaks <-
           backend = MsBackendMzR(),
           BPPARAM = SnowParam(workers = 1)
         )
-
+        checkScans(data_batch@spectra)
         #Define study and QC samples --> all not QC files are deemed study files
         sampleData(data_batch)$sample_type <- "study"
         sampleData(data_batch)$sample_type[grep(pattern = QC_pattern, files_batch)] <-
