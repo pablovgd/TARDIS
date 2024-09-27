@@ -1,5 +1,5 @@
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/pablovgd/T.A.R.D.I.S./actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pablovgd/T.A.R.D.I.S./actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/pablovgd/TARDIS/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel)](https://github.com/pablovgd/TARDIS/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 # T.A.R.D.I.S. <img src="https://github.com/pablovgd/T.A.R.D.I.S./blob/main/www/tardis.png" width="150" height="150" align = right />        
