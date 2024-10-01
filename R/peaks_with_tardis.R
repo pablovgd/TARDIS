@@ -892,7 +892,7 @@ tardis_peaks <-
 
       results <- results_samples
 
-      if(is.null(max_int_filter) == FALSE ){
+      if(is.null(max_int_filter) == FALSE && max_int_filter != 0){
         results <- results[which(results$MaxInt >= max_int_filter),]
       }
 
@@ -900,34 +900,34 @@ tardis_peaks <-
 
       auc_table <- results %>%
         select(Component, Sample, AUC) %>%
-        spread(Sample, AUC)
+        spread(Sample, AUC, fill = NA, drop = FALSE)
 
       write.csv(auc_table, file = paste0(output_directory, "auc_table.csv"))
 
 
       pop_table <- results %>%
         select(Component, Sample, pop) %>%
-        spread(Sample, pop)
+        spread(Sample, pop, fill = NA, drop = FALSE)
 
       write.csv(pop_table, file = paste0(output_directory, "pop_table.csv"))
 
 
       SNR_table <- results %>%
         select(Component, Sample, SNR) %>%
-        spread(Sample, SNR)
+        spread(Sample, SNR, fill = NA, drop = FALSE)
 
       write.csv(SNR_table, file = paste0(output_directory, "snr_table.csv"))
 
       int_table <- results %>%
         select(Component, Sample, MaxInt) %>%
-        spread(Sample, MaxInt)
+        spread(Sample, MaxInt, fill = NA, drop = FALSE)
 
       write.csv(int_table, file = paste0(output_directory, "int_table.csv"))
 
 
       peakcor_table <- results %>%
         select(Component, Sample, peak_cor) %>%
-        spread(Sample, peak_cor)
+        spread(Sample, peak_cor, fill = NA, drop = FALSE)
 
       write.csv(peakcor_table, file = paste0(output_directory, "peakcor_table.csv"))
 
