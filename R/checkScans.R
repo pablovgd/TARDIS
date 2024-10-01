@@ -4,10 +4,11 @@
 #' Currently stops if a sample is detected that has less than 90% of the mean
 #' of spectra in all samples.
 #'
-#'
 #' @param spectra `Spectra` object
 #'
 #' @importFrom ProtGenerics dataOrigin
+#' @importFrom Spectra isEmpty
+#' @return
 #' @export
 #' @author Pablo Vangeenderhuysen
 checkScans <- function(spectra){
