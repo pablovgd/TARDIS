@@ -1,8 +1,9 @@
 #' Check if any samples are missing spectra
 #'
-#' @param spectra `Spectra` object 
+#' @param spectra `Spectra` object
 #'
 #' @importFrom ProtGenerics dataOrigin
+#' @importFrom Spectra isEmpty
 #' @return
 #' @export
 #'
