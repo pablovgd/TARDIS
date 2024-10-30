@@ -1,29 +1,41 @@
 #' T.A.R.D.I.S. Peak Detection
 #'
 #' Main function of the T.A.R.D.I.S. package that is called in the Shiny app.
-#' Given data files and a list of targeted compounds it returns the area of those peaks, optional diagnostic plots and several other parameters.
+#' Given data files and a list of targeted compounds it returns the area of
+#' those peaks, optional diagnostic plots and several other parameters.
 #' See vignette for a detailed tutorial.
 #'
 #' @param file_path Path to the .mzML or .mzXML files containing LC-MS data.
 #' @param dbData Output of [createTargetList()]
 #' @param ppm Allowed deviance from given m/z of targets in ppm.
-#' @param rtdev Allowed deviance from given retention time of compound, defines search window for the peak picking algorithm.
-#' @param mode Can be either "metabolomics", one mass range of "lipidomics", multiple mass ranges
-#' @param mass_range If the user uses data with overlapping mass windows, only one mass window at the time can be analyzed, specify this here.
-#' @param polarity Ionisation mode to be considered, can be either "positive" or "negative"
+#' @param rtdev Allowed deviance from given retention time of compound, defines
+#' search window for the peak picking algorithm.
+#' @param mode Can be either "metabolomics", one mass range; or "lipidomics",
+#' multiple mass ranges
+#' @param mass_range If the user uses data with overlapping mass windows, only
+#' one mass window at the time can be analyzed, specify this here.
+#' @param polarity Ionisation mode to be considered, can be either "positive" or
+#' "negative"
 #' @param output_directory Provide directory to store output
 #' @param plots_samples Create plots for all samples TRUE or FALSE
-#' @param plots_QC Create plots for all QC's TRUE or FALSE
-#' @param diagnostic_plots Create diagnostic plots of 5 QCs spreaded across the analyses
+#' @param plots_QC Create plots for all QCs TRUE or FALSE
+#' @param diagnostic_plots Create diagnostic plots of 5 QCs spread across the
+#' analyses
 #' @param batch_mode
-#' @param batch_positions Indicate start and end file of each batch, e.g. list(c(1,20)c(21,40))
+#' @param batch_positions Indicate start and end file of each batch, e.g.
+#' list(c(1,20), c(21,40))
 #' @param QC_pattern String with pattern of QC files
 #' @param sample_pattern String with pattern of sample files
-#' @param rt_alignment Align retention time based on internal stand compounds in the QC samples, TRUE or FALSE. Performed using the [adjustRtime()] function from [xcms]
-#' @param int_std_id Provide ID's of internal standard compounds for retention time alignment
-#' @param screening_mode Run the algorithm over 5 QC's to quickly check retention time shifts
+#' @param rt_alignment Align retention time based on internal stand compounds in
+#' the QC samples, TRUE or FALSE. Performed using the [adjustRtime()] function
+#' from [xcms]
+#' @param int_std_id Provide ID's of internal standard compounds for retention
+#' time alignment
+#' @param screening_mode Run the algorithm over 5 QCs to quickly check
+#' retention time shifts
 #' @param smoothing Smooth the peaks with [sgolayfilt()], TRUE or FALSE
-#' @param max_int_filter Set minimum max intensity of peak to be included in results
+#' @param max_int_filter Set minimum max intensity of peak to be included in
+#' results
 #'
 #' @import MsExperiment
 #' @importFrom Spectra MsBackendMzR
@@ -79,18 +91,306 @@ tardis_peaks <-
            screening_mode,
            smoothing,
            max_int_filter) {
-    #Create empty dataframe for sample results
-    results_samples <-
+
+  #List mz(X)ML files in directory
+  files <-
+    list.files(file_path, full.names = T, pattern = "mzML$|mzXML$")
+
+  #Select polarity, mode, ppm & deltaTR
+  polarity <- polarity #you can change the polarity here, needs to be
+                       #  "positive" or "negative"
+  mode <- mode  #you can change the mode here, needs to be "lipidomics" or
+                #  "metabolomics"
+
+  #With these two parameters, you can set the allowed errors for mass &
+  #  retention time!
+  ppm <-
+    ppm #ppm error for EIC extraction #POLAR = 5ppm / LIPIDOMICS =  10 ppm
+
+  mass_range <-
+    mass_range
+
+  deltaTR <- rtdev
+
+  #Save compound info
+  if (mode == "lipidomics") {
+    dbData <- dbData[which(dbData$`m/z` < mass_range[2] & dbData$`m/z` > mass_range[1]),]
+  }
+
+  info_compounds <- dbData
+
+
+  if (screening_mode == TRUE) {
+
+    #Select all QCs
+    QC_files <-
+      files[grep(pattern = QC_pattern, files)]
+    data_QC <- MsExperiment::readMsExperiment(
+      spectraFiles = QC_files,
+      backend = MsBackendMzR(),
+      BPPARAM = SnowParam(workers = 1)
+    )
+
+    if (mode == "lipidomics") {
+      spectra_QC <- data_QC@spectra
+      spectra_QC <- filterMzRange(spectra_QC, mass_range)
+      spectra_QC <- filterEmptySpectra(spectra_QC)
+    } else {
+      spectra_QC <- data_QC@spectra
+    }
+
+    #Check that spectra are reasonably complete
+    checkScans(spectra_QC)
+
+
+    #Create ranges for all compounds
+    ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
+    #Get mz & rt ranges
+    mzRanges <- ranges[[1]]
+    rtRanges <- ranges[[2]]
+
+    #Get QC sample names
+    sample_names <-
+      unlist(lapply(data_QC@sampleData$spectraOrigin, basename))
+
+    if (rt_alignment == TRUE) {
+      #Get the ranges for the internal standard compounds
+      internal_standards_rt <-
+        rtRanges[which(dbData$ID %in% int_std_id),]
+      internal_standards_mz <-
+        mzRanges[which(dbData$ID %in% int_std_id),]
+      dbData_std <- dbData[which(dbData$ID %in% int_std_id),]
+
+      #Initialize empty vectors
+      int_std_foundrt <- vector("numeric", length(sample_names))
+      int_std <- matrix(-1,
+                        nrow = nrow(internal_standards_rt),
+                        ncol = length(sample_names))
+
+      #Retrieve foundRT of internal standards in QC's, loop over all samples
+      #  and all internal standards
+      for (j in 1:nrow(internal_standards_rt)) {
+
+        for (i in 1:length(sample_names)) {
+          #Get current sample name
+          sample_name <- sample_names[i]
+
+          #Filter data to get data of sample and the mz and rt range of the
+          #  current target
+          sample_spectra <-
+            filterDataOrigin(spectra_QC, unique(dataOrigin(spectra_QC))[i])
+          sample_spectra <-
+            filterRt(sample_spectra, internal_standards_rt[j,])
+          sample_spectra <-
+            filterMzRange(sample_spectra, internal_standards_mz[j,])
+
+          #Extract intensities and RT from Spectra object
+          sfs_agg <-
+            addProcessing(sample_spectra, .sum_intensities)
+          eic <-
+            cbind(rtime(sfs_agg),
+                  unlist(intensity(sfs_agg), use.names = FALSE))
+
+          rt <- eic[, 1]
+          int <- eic[, 2]
+
+          #NA intensties are set to zero
+          int[which(is.na(int))] <- 0
+
+
+          if (smoothing == TRUE) {
+            #To determine the borders more easily, smoothing is applied
+            smoothed <- sgolayfilt(int, p = 3, n = 7)
+            int <- smoothed
+            int[int < 0] <- 0
+          }
+          cat(rt, "\n")
+          #Border detection
+          border <- find_peak_points(rt, int, dbData_std$tr[j])
+
+          #Save found RT for internal standard target
+          int_std_foundrt[i] <- border[[3]]
+        }
+
+        int_std[j,] <- int_std_foundrt
+      }
+
+
+      #Define parameters for retention time adjustment, based on the QCs and
+      #  the internal standards
+      param <-
+        PeakGroupsParam(
+          minFraction = 0.9,
+          span = 0.5,
+          peakGroupsMatrix = int_std
+        )
+
+      #Adjust the RT
+      data_QC <- adjustRtime(data_QC, param = param)
+      #Apply the adjusted RT
+      data_QC <- applyAdjustedRtime(data_QC)
+    }
+
+    #Find all targets in x QC's
+    if (mode == "lipidomics") {
+      spectra_QC <- data_QC@spectra
+      spectra_QC <- filterMzRange(spectra_QC,mass_range)
+      spectra_QC <- filterEmptySpectra(spectra_QC)
+    } else {
+      spectra_QC <- data_QC@spectra
+    }
+
+    spectra <- spectra_QC
+
+    #Create empty data frame for QC results
+    n_QCs <- length(sample_names)
+    df_nrow <- nrow(rtRanges) * n_QCs
+    results_QCs <-
       data.frame(
-        Component = character(0),
-        Sample = character(0),
-        AUC = numeric(0),
-        SNR = numeric(0),
-        peak_cor = numeric(0),
-        foundRT = numeric(0),
-        pop = numeric(0)
+        Component = character(df_nrow),
+        Sample = character(df_nrow),
+        AUC = numeric(df_nrow),
+        MaxInt = numeric(df_nrow),
+        SNR = numeric(df_nrow),
+        peak_cor = numeric(df_nrow),
+        foundRT = numeric(df_nrow),
+        pop = numeric(df_nrow),
+        compound_name = character(df_nrow),
+        compound_mz = numeric(df_nrow),
+        compound_tr = numeric(df_nrow)
       )
-    #Create empty dataframe for QC results
+
+
+
+    for (j in 1:nrow(rtRanges)) {
+      rt_list <- list()
+      int_list <- list()
+      x_list <- list()
+      y_list <- list()
+
+      for (i in 1:length(sample_names)) {
+        sample_name <- sample_names[i]
+
+        sample_spectra <-
+          filterDataOrigin(spectra, unique(dataOrigin(spectra))[i])
+        sample_spectra <-
+          filterRt(sample_spectra, rtRanges[j,])
+        sample_spectra <-
+          filterMzRange(sample_spectra, mzRanges[j,])
+
+        sfs_agg <-
+          addProcessing(sample_spectra, .sum_intensities)
+        eic <-
+          cbind(rtime(sfs_agg),
+                unlist(intensity(sfs_agg), use.names = FALSE))
+
+        rt <- eic[, 1]
+        int <- eic[, 2]
+
+        int[which(is.na(int))] = 0
+
+        if (smoothing == TRUE) {
+          smoothed <- sgolayfilt(int, p = 3, n = 7)
+          int <- smoothed
+          int[int < 0] <- 0
+        }
+
+        border <- find_peak_points(rt, int, dbData$tr[j])
+
+        x <- rt[border$left:border$right]
+        y <- int[border$left:border$right]
+
+        rt_list <- c(rt_list, list(rt))
+        int_list <- c(int_list, list(int))
+        x_list <- c(x_list, list(x))
+        y_list <- c(y_list, list(y))
+
+        #Check if there are at least two unique values for the component
+        if (length(unique(y)) > 1) {
+          #Calculate AUC
+          auc <- trapz(x, y)
+          #calculate points over peak
+          pop <- length(x)
+
+          #Calculate QScore
+          qscore <- unlist(qscoreCalculator(x, y))
+
+          found_rt <- border$foundrt
+          max_int = int[border$peakindex]
+
+          # Get information about the current component from info_compounds
+          compound_info <- dbData[j,]
+
+          # Store results in the data frame with compound information
+          results_QCs[(j-1)*n_QCs + i, ] <- list(
+              Component = compound_info$ID,
+              Sample = sample_name,
+              AUC = auc,
+              MaxInt = max_int,
+              SNR = (qscore[1]),
+              peak_cor = (qscore[2]),
+              foundRT = found_rt,
+              pop = pop,
+              compound_name = compound_info$NAME,
+              compound_mz = compound_info$`m/z`,
+              compound_tr = compound_info$tr
+          )
+
+        } else {
+          compound_info <- dbData[j,]
+
+          # Store results in the data frame with compound information
+          results_QCs[(j-1)*n_QCs + i, ] <- list(
+              Component = compound_info$ID,
+              Sample = sample_name,
+              AUC = NA,
+              MaxInt = NA,
+              SNR = NA,
+              peak_cor = NA,
+              foundRT = NA,
+              pop = NA,
+              compound_name = compound_info$NAME,
+              compound_mz = compound_info$`m/z`,
+              compound_tr = compound_info$tr
+          )
+        }
+      }
+
+
+
+      # Create and save the plot for the current component
+      batchnr <- 1
+      if (diagnostic_plots == TRUE) {
+        plotDiagnostic(
+          compound_info,
+          output_directory,
+          rt_list,
+          int_list,
+          x_list,
+          y_list,
+          batchnr,
+          sample_names
+        )
+      }
+    }
+
+
+
+
+    avg_metrics_table <- results_QCs %>%
+      group_by(Component) %>%
+      summarise_at(vars(-Sample), list( ~ if (is.numeric(.))
+        mean(., na.rm = TRUE)
+        else
+          dplyr::first(.)))
+
+    write.csv(avg_metrics_table,
+              file = paste0(output_directory, "qc_screening.csv"))
+
+  } else {
+    # Not screening mode: process all QCs/samples/batches
+
+    #Create empty data frame for QC results
     results_QCs <-
       data.frame(
         Component = character(0),
@@ -102,60 +402,70 @@ tardis_peaks <-
         pop = numeric(0)
       )
 
-    #List files in directory
-    files <-
-      list.files(file_path, full.names = T, pattern = "mzML|mzXML")
+    #Loop over the batches
 
-    #Select polarity, mode, ppm & deltaTR
-    polarity <-
-      polarity #you can change the polarity here, needs to be "positive" or "negative"
-    mode <-
-      mode #you can change the mode here, needs to be "lipidomics" or "metabolomics"
-    #With these two parameters, you can set the allowed errors for mass & retention time!
-    ppm <-
-      ppm #ppm error for EIC extraction #POLAR = 5ppm / LIPIDOMICS =  10 ppm
+    for (batchnr in 1:length(batch_positions)) {
+      dbData <- info_compounds
 
-    mass_range <-
-      mass_range
+      #Select files in the batch
+      files_batch <-
+        files[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
 
-    deltaTR <- rtdev
+      #Subselection, only the sample files: use sample pattern if provided, if
+      #  not, inverse of QC pattern
 
-    #save compound info
-    if(mode == "lipidomics"){
-      dbData <- dbData[which(dbData$`m/z` < mass_range[2] & dbData$`m/z` > mass_range[1]),]
-    }
-
-
-    info_compounds <- dbData
-
-
-
-
-    if (screening_mode == TRUE) {
-      #select all qc's
+      if (sample_pattern == "") {
+        sample_files <-
+          files_batch[grep(pattern = QC_pattern, files_batch, invert = TRUE)]
+      } else {
+        sample_files <-
+          files_batch[grep(pattern = sample_pattern, files_batch,
+                           invert = FALSE)]
+      }
+      #Subselection, only the QC files
       QC_files <-
-        files[grep(pattern = QC_pattern, files)]
-      data_QC <- MsExperiment::readMsExperiment(
-        spectraFiles = QC_files,
+        files_batch[grep(pattern = QC_pattern, files_batch)]
+
+      #Load all the data for all files in the batch
+
+      data_batch <- readMsExperiment(
+        spectraFiles = files_batch,
         backend = MsBackendMzR(),
         BPPARAM = SnowParam(workers = 1)
       )
 
-      if(mode == "lipidomics"){
+      checkScans(data_batch@spectra)
+
+      #Define study and QC samples --> all not QC files are deemed study files
+      sampleData(data_batch)$sample_type <- "study"
+      sampleData(data_batch)$sample_type[grep(pattern = QC_pattern,
+                                              files_batch)] <- "QC"
+
+      #Subselect QC files, first we will locate the peaks of the internal
+      #  standards in the QC files of this batch to align the rest of the
+      #  batch data to
+
+      data_QC <-
+        data_batch[which(sampleData(data_batch)$sample_type == "QC")]
+      #Extract spectra
+      if (mode == "lipidomics") {
         spectra_QC <- data_QC@spectra
         spectra_QC <- filterMzRange(spectra_QC,mass_range)
         spectra_QC <- filterEmptySpectra(spectra_QC)
-      } else{spectra_QC <- data_QC@spectra}
-
-      checkScans(spectra_QC)
-
+      } else {
+        spectra_QC <- data_QC@spectra
+      }
 
       #Create ranges for all compounds
       ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
+
       #Get mz & rt ranges
       mzRanges <- ranges[[1]]
       rtRanges <- ranges[[2]]
 
+      #Get QC sample names
+      sample_names <-
+        unlist(lapply(data_QC@sampleData$spectraOrigin, basename))
 
       if (rt_alignment == TRUE) {
         #Get the ranges for the internal standard compounds
@@ -164,29 +474,28 @@ tardis_peaks <-
         internal_standards_mz <-
           mzRanges[which(dbData$ID %in% int_std_id),]
         dbData_std <- dbData[which(dbData$ID %in% int_std_id),]
-        #Get QC sample names
-        sample_names <-
-          lapply(data_QC@sampleData$spectraOrigin, basename)
 
+        #Initialize empty vectors
+        int_std_foundrt <- vector("numeric", length(sample_names))
+        int_std <- matrix(-1,
+                          nrow = nrow(internal_standards_rt),
+                          ncol = length(sample_names))
 
-        #Initiate empty vectors
-        int_std_foundrt <- c()
-        int_std <- c()
-
-        #Retrieve foundRT of internal standards in QC's, loop over all samples and all internal standards
-        for (j in 1:dim(internal_standards_rt)[1]) {
+        #Retrieve foundRT of internal standards in QCs, loop over all samples
+        #  and all internal standards
+        for (j in 1:nrow(internal_standards_rt)) {
           rt_list = list()
           int_list = list()
           x_list = list()
           y_list = list()
 
 
-
           for (i in 1:length(sample_names)) {
             #get current sample name
-            sample_name <- unlist(sample_names[i])
+            sample_name <- sample_names[i]
 
-            #Filter data to get data of sample and the mz and rt range of the current target
+            #Filter data to get data of sample and the mz and rt range of the
+            #  current target
             sample_spectra <-
               filterDataOrigin(spectra_QC, unique(dataOrigin(spectra_QC))[i])
             sample_spectra <-
@@ -208,195 +517,60 @@ tardis_peaks <-
             int[which(is.na(int))] = 0
 
             #To determine the borders more easily, smoothing is applied
-            smoothed <- sgolayfilt(int, p = 3, n = 7)
-
-
             if(smoothing == TRUE){
+              smoothed <- sgolayfilt(int, p = 3, n = 7)
               int <- smoothed
               int[int < 0] <- 0
             }
 
             #Border detection
-            border <- find_peak_points(rt, smoothed, dbData_std$tr[j])
+            border <- find_peak_points(rt, int, dbData_std$tr[j])
 
             #Save found RT for internal standard target
-            int_std_foundrt <-
-              cbind(int_std_foundrt, border[[3]]) #this will finally contain all found rts for the different internal standards in this sample
-
+            int_std_foundrt[i] <- border[[3]]
           }
 
-
-          int_std <-
-            rbind(int_std, int_std_foundrt) #this will contain all the found rt's in all samples
-          int_std_foundrt <- c()
+          int_std[j,] <- int_std_foundrt
         }
 
 
-        #Define parameters for retention time adjustment, based on the QC's and the internal standards
+        #Define parameters for retention time adjustment, based on the QCs and
+        #  the internal standards
         param <-
           PeakGroupsParam(
             minFraction = 0.9,
-            span = 0.5  ,
-            peakGroupsMatrix = int_std
+            span = 0.5,
+            peakGroupsMatrix = int_std,
+            subset = which(sampleData(data_batch)$sample_type == "QC")
           )
 
         #Adjust the RT
-        data_QC <- adjustRtime(data_QC, param = param)
+        data_batch <- adjustRtime(data_batch, param = param)
         #Apply the adjusted RT
-        data_QC <- applyAdjustedRtime(data_QC)
-      }
-      sample_names <-
-        lapply(data_QC@sampleData$spectraOrigin, basename)
-      #Find all targets in x QC's
-      if(mode == "lipidomics"){
-        spectra_QC <- data_QC@spectra
-        spectra_QC <- filterMzRange(spectra_QC,mass_range)
-        spectra_QC <- filterEmptySpectra(spectra_QC)
-      } else{spectra_QC <- data_QC@spectra}
-
-      spectra<- spectra_QC
-
-
-      for (j in 1:dim(rtRanges)[1]) {
-        rt_list = list()
-        int_list = list()
-        x_list = list()
-        y_list = list()
-
-
-
-        for (i in 1:length(sample_names)) {
-          sample_name <- unlist(sample_names[i])
-
-
-          sample_spectra <-
-            filterDataOrigin(spectra, unique(dataOrigin(spectra))[i])
-          sample_spectra <-
-            filterRt(sample_spectra, rtRanges[j,])
-          sample_spectra <-
-            filterMzRange(sample_spectra, mzRanges[j,])
-
-          sfs_agg <-
-            addProcessing(sample_spectra, .sum_intensities)
-          eic <-
-            cbind(rtime(sfs_agg),
-                  unlist(intensity(sfs_agg), use.names = FALSE))
-
-
-
-
-          rt <- eic[, 1]
-          int <- eic[, 2]
-
-          int[which(is.na(int))] = 0
-
-          smoothed <- sgolayfilt(int, p = 3, n = 7)
-
-
-          if(smoothing == TRUE){
-            int <- smoothed
-            int[int < 0] <- 0
-          }
-
-          border <- find_peak_points(rt, smoothed, dbData$tr[j])
-
-          x <- rt[border$left:border$right]
-          y <- int[border$left:border$right]
-
-          rt_list <- c(rt_list, list(rt))
-          int_list <- c(int_list, list(int))
-          x_list <- c(x_list, list(x))
-          y_list <- c(y_list, list(y))
-
-          # Check if there are at least two unique values for the component
-          if (length(unique(y)) > 1) {
-            # Calculate AUC
-            auc <- trapz(x, y)
-            #calculate points over peak
-            pop <- length(x)
-
-            # Calculate QScore
-            qscore <- qscoreCalculator(x, y)
-
-            found_rt <- border$foundrt
-            max_int = int[border$peakindex]
-
-            # Get information about the current component from info_compounds
-            compound_info <- dbData[j,]
-
-            # Append results to the data frame with compound information
-            results_QCs <- rbind(
-              results_QCs,
-              data.frame(
-                Component = compound_info$ID,
-                Sample = sample_name,
-                AUC = auc,
-                MaxInt = max_int,
-                SNR = qscore[1],
-                peak_cor = qscore[2],
-                foundRT = found_rt,
-                pop = pop,
-                compound_info
-              )
-            )
-
-          } else{
-            compound_info <- dbData[j,]
-
-            # Append results to the data frame with compound information
-            results_QCs <- rbind(
-              results_QCs,
-              data.frame(
-                Component = compound_info$ID,
-                Sample = sample_name,
-                AUC = NA,
-                MaxInt = NA,
-                SNR = NA,
-                peak_cor = NA,
-                foundRT = NA,
-                pop = NA,
-                compound_info
-              )
-            )
-          }
-        }
-
-
-
-        # Create and save the plot for the current component
-        batchnr = 1
-        if (diagnostic_plots == TRUE) {
-          plotDiagnostic(
-            compound_info,
-            output_directory,
-            rt_list,
-            int_list,
-            x_list,
-            y_list,
-            batchnr,
-            sample_names
-          )
-        }
+        data_batch <- applyAdjustedRtime(data_batch)
       }
 
 
 
+      #Now, we try and find ALL compounds in the QC samples and save their
+      #  foundRT to search the compounds at that RT in the sample files
+      #Skip this step if there aren't any QCs available.
 
-      avg_metrics_table <- results_QCs %>%
-        group_by(Component) %>%
-        summarise_at(vars(-Sample), list( ~ if (is.numeric(.))
-          mean(., na.rm = TRUE)
-          else
-            first(.)))
 
-      write.csv(avg_metrics_table,
-                file = paste0(output_directory, "qc_screening.csv"))
+      data_QC <-
+        data_batch[which(sampleData(data_batch)$sample_type == "QC")]
 
-    } else {
-      #Loop over the batches
+      if (length(data_QC) != 0) {
 
-      for (batchnr in 1:length(batch_positions)) {
-        dbData <- info_compounds
+        if (mode == "lipidomics") {
+          spectra_QC <- data_QC@spectra
+          spectra_QC <- filterMzRange(spectra_QC,mass_range)
+          spectra_QC <- filterEmptySpectra(spectra_QC)
+        } else {
+          spectra_QC <- data_QC@spectra
+        }
+
+        spectra <- spectra_QC
 
         #Empty dataframe for results of the QCs
         results_QCs_batch <-
@@ -410,346 +584,6 @@ tardis_peaks <-
             pop = numeric(0)
           )
 
-        #Select files in the batch
-        files_batch <-
-          files[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
-
-        #Subselection, only the sample files: use sample pattern if provided, if not, inverse of QC pattern
-
-        if (sample_pattern == "") {
-          sample_files <-
-            files_batch[grep(pattern = QC_pattern, files_batch, invert = TRUE)]
-        } else {
-          sample_files <-
-            files_batch[grep(pattern = sample_pattern, files_batch, invert = FALSE)]
-        }
-        #Subselection, only the QC files
-        QC_files <-
-          files_batch[grep(pattern = QC_pattern, files_batch)]
-
-        #Load all the data for all files in the batch
-
-        data_batch <- readMsExperiment(
-          spectraFiles = files_batch,
-          backend = MsBackendMzR(),
-          BPPARAM = SnowParam(workers = 1)
-        )
-        checkScans(data_batch@spectra)
-        #Define study and QC samples --> all not QC files are deemed study files
-        sampleData(data_batch)$sample_type <- "study"
-        sampleData(data_batch)$sample_type[grep(pattern = QC_pattern, files_batch)] <-
-          "QC"
-
-        #Subselect QC files, first we will locate the peaks of the internal standards in the QC files of this batch to align the rest of the batch data to
-
-        data_QC <-
-          data_batch[which(sampleData(data_batch)$sample_type == "QC")]
-        #Extract spectra
-        if(mode == "lipidomics"){
-          spectra_QC <- data_QC@spectra
-          spectra_QC <- filterMzRange(spectra_QC,mass_range)
-          spectra_QC <- filterEmptySpectra(spectra_QC)
-        } else{spectra_QC <- data_QC@spectra}
-        #Create ranges for all compounds
-        ranges <- createRanges(data_QC, dbData, ppm, deltaTR)
-        #Get mz & rt ranges
-        mzRanges <- ranges[[1]]
-        rtRanges <- ranges[[2]]
-
-
-        if (rt_alignment == TRUE) {
-          #Get the ranges for the internal standard compounds
-          internal_standards_rt <-
-            rtRanges[which(dbData$ID %in% int_std_id),]
-          internal_standards_mz <-
-            mzRanges[which(dbData$ID %in% int_std_id),]
-          dbData_std <- dbData[which(dbData$ID %in% int_std_id),]
-          #Get QC sample names
-          sample_names <-
-            lapply(data_QC@sampleData$spectraOrigin, basename)
-
-
-          #Initiate empty vectors
-          int_std_foundrt <- c()
-          int_std <- c()
-
-          #Retrieve foundRT of internal standards in QC's, loop over all samples and all internal standards
-          for (j in 1:dim(internal_standards_rt)[1]) {
-            rt_list = list()
-            int_list = list()
-            x_list = list()
-            y_list = list()
-
-
-
-            for (i in 1:length(sample_names)) {
-              #get current sample name
-              sample_name <- unlist(sample_names[i])
-
-              #Filter data to get data of sample and the mz and rt range of the current target
-              sample_spectra <-
-                filterDataOrigin(spectra_QC, unique(dataOrigin(spectra_QC))[i])
-              sample_spectra <-
-                filterRt(sample_spectra, internal_standards_rt[j,])
-              sample_spectra <-
-                filterMzRange(sample_spectra, internal_standards_mz[j,])
-
-              #Extract intensities and RT from Spectra object
-              sfs_agg <-
-                addProcessing(sample_spectra, .sum_intensities)
-              eic <-
-                cbind(rtime(sfs_agg),
-                      unlist(intensity(sfs_agg), use.names = FALSE))
-
-              rt <- eic[, 1]
-              int <- eic[, 2]
-
-              #NA intensties are set to zero
-              int[which(is.na(int))] = 0
-
-              #To determine the borders more easily, smoothing is applied
-              smoothed <- sgolayfilt(int, p = 3, n = 7)
-
-              if(smoothing == TRUE){
-                int <- smoothed
-                int[int < 0] <- 0
-              }
-
-              #Border detection
-              border <- find_peak_points(rt, smoothed, dbData_std$tr[j])
-
-              #Save found RT for internal standard target
-              int_std_foundrt <-
-                cbind(int_std_foundrt, border[[3]]) #this will finally contain all found rts for the different internal standards in this sample
-
-            }
-
-
-            int_std <-
-              rbind(int_std, int_std_foundrt) #this will contain all the found rt's in all samples
-            int_std_foundrt <- c()
-          }
-
-
-          #Define parameters for retention time adjustment, based on the QC's and the internal standards
-          param <-
-            PeakGroupsParam(
-              minFraction = 0.9,
-              span = 0.5  ,
-              peakGroupsMatrix = int_std,
-              subset = which(sampleData(data_batch)$sample_type == "QC")
-            )
-
-          #Adjust the RT
-          data_batch <- adjustRtime(data_batch, param = param)
-          #Apply the adjusted RT
-          data_batch <- applyAdjustedRtime(data_batch)
-        }
-
-
-
-        #Now, we try and find ALL compounds in the QC samples and save their foundRT to search the compounds at that RT in the sample files
-        #Skip this step if there aren't any QC's available.
-
-
-        data_QC <-
-          data_batch[which(sampleData(data_batch)$sample_type == "QC")]
-
-        if(length(data_QC) != 0 ){
-
-          sample_names <-
-            lapply(data_QC@sampleData$spectraOrigin, basename)
-
-
-
-          if(mode == "lipidomics"){
-            spectra_QC <- data_QC@spectra
-            spectra_QC <- filterMzRange(spectra_QC,mass_range)
-            spectra_QC <- filterEmptySpectra(spectra_QC)
-          } else{spectra_QC <- data_QC@spectra}
-
-          spectra <- spectra_QC
-
-          for (j in 1:dim(rtRanges)[1]) {
-            rt_list = list()
-            int_list = list()
-            x_list = list()
-            y_list = list()
-
-
-
-            for (i in 1:length(sample_names)) {
-              sample_name <- unlist(sample_names[i])
-
-
-              sample_spectra <-
-                filterDataOrigin(spectra, unique(dataOrigin(spectra))[i])
-              sample_spectra <-
-                filterRt(sample_spectra, rtRanges[j,])
-              sample_spectra <-
-                filterMzRange(sample_spectra, mzRanges[j,])
-
-              sfs_agg <-
-                addProcessing(sample_spectra, .sum_intensities)
-              eic <-
-                cbind(rtime(sfs_agg),
-                      unlist(intensity(sfs_agg), use.names = FALSE))
-
-
-
-
-              rt <- eic[, 1]
-              int <- eic[, 2]
-
-              int[which(is.na(int))] = 0
-
-              smoothed <- sgolayfilt(int, p = 3, n = 7)
-
-              if(smoothing == TRUE){
-                int <- smoothed
-                int[int < 0] <- 0
-              }
-
-              border <- find_peak_points(rt, smoothed, dbData$tr[j])
-
-              x <- rt[border$left:border$right]
-              y <- int[border$left:border$right]
-
-              rt_list <- c(rt_list, list(rt))
-              int_list <- c(int_list, list(int))
-              x_list <- c(x_list, list(x))
-              y_list <- c(y_list, list(y))
-
-              # Check if there are at least two unique values for the component
-              if (length(unique(y)) > 1) {
-                # Calculate AUC
-                auc <- trapz(x, y)
-
-                pop <- length(x)
-                # Calculate QScore
-                qscore <- qscoreCalculator(x, y)
-
-                found_rt <- border$foundrt
-                max_int = int[border$peakindex]
-
-                # Get information about the current component from info_compounds
-                compound_info <- dbData[j,]
-
-                # Append results to the data frame with compound information
-                results_QCs_batch <- rbind(
-                  results_QCs_batch,
-                  data.frame(
-                    Component = compound_info$ID,
-                    Sample = sample_name,
-                    AUC = auc,
-                    MaxInt = max_int,
-                    SNR = qscore[1],
-                    peak_cor = qscore[2],
-                    foundRT = found_rt,
-                    pop = pop,
-                    compound_info
-                  )
-                )
-
-              } else{
-                compound_info <- dbData[j,]
-
-                # Append results to the data frame with compound information
-                results_QCs_batch <- rbind(
-                  results_QCs_batch,
-                  data.frame(
-                    Component = compound_info$ID,
-                    Sample = sample_name,
-                    AUC = NA,
-                    MaxInt = NA,
-                    SNR = NA,
-                    peak_cor = NA,
-                    foundRT = NA,
-                    pop = NA,
-                    compound_info
-                  )
-                )
-              }
-            }
-
-
-
-            # Create and save the plot for the current component
-
-            if (plots_QC == TRUE) {
-              plotQCs(
-                compound_info,
-                output_directory,
-                rt_list,
-                int_list,
-                x_list,
-                y_list,
-                batchnr,
-                sample_names
-              )
-            }
-
-          }
-
-          results_QCs <- rbind(results_QCs, results_QCs_batch)
-
-
-          # Replace rtmed with average foundRT from previous results
-
-          new_rt_avg <- results_QCs_batch %>%
-            group_by(ID) %>%
-            summarise(mean = mean(foundRT), na.rm = TRUE)
-
-          dbData <- merge(dbData, new_rt_avg, by = "ID")
-
-          dbData$trold <- dbData$tr
-          dbData$tr <- new_rt_avg$mean
-
-          #If no RT is found, restore old RT
-
-          for (k in 1:dim(dbData[1])) {
-            if (is.na(dbData$tr[k]) == TRUE) {
-              dbData$tr[k] <- dbData$trold[k]
-            }
-          }
-
-        }
-        #Next do the whole analysis for the samples in the same batch of the QC's to find ALL the compounds at the corrected RT. (SAMPLES + QC)
-
-
-        # data_samples <-
-        #   readMsExperiment(
-        #     spectraFiles = sample_files,
-        #     backend = MsBackendMzR(),
-        #     BPPARAM = SnowParam(workers = 1)
-        #   )
-
-        #Get sample data
-        data_samples <- data_batch
-        #data_samples <- data_batch[which(sampleData(data_batch)$sample_type == "study")]
-
-
-        # data_samples <- adjustRtime(data_samples,param = ObiwarpParam())
-
-
-        sample_names <-
-          lapply(data_samples@sampleData$spectraOrigin, basename)
-
-
-
-
-        #Create ranges around new RT
-        ranges <- createRanges(data_samples, dbData, ppm, deltaTR)
-        mzRanges <- ranges[[1]]
-        rtRanges <- ranges[[2]]
-
-
-        if(mode == "lipidomics"){
-          spectra <- data_samples@spectra
-          spectra <- filterMzRange(spectra,mz = mass_range)
-          spectra <- filterEmptySpectra(spectra)
-        } else{spectra <- data_samples@spectra}
-
         for (j in 1:dim(rtRanges)[1]) {
           rt_list = list()
           int_list = list()
@@ -757,12 +591,7 @@ tardis_peaks <-
           y_list = list()
 
           for (i in 1:length(sample_names)) {
-            sample_name <- unlist(sample_names[i])
-            # chromatograms <-
-            #   chromatogram(data_QC, rt = rtRanges[j, ], mz = mzRanges[j, ])
-            # rt <- chromatograms@.Data[[i]]@rtime
-            # int <- chromatograms@.Data[[i]]@intensity
-
+            sample_name <- sample_names[i]
 
             sample_spectra <-
               filterDataOrigin(spectra, unique(dataOrigin(spectra))[i])
@@ -771,33 +600,24 @@ tardis_peaks <-
             sample_spectra <-
               filterMzRange(sample_spectra, mzRanges[j,])
 
-
-
             sfs_agg <-
               addProcessing(sample_spectra, .sum_intensities)
             eic <-
               cbind(rtime(sfs_agg),
                     unlist(intensity(sfs_agg), use.names = FALSE))
 
-
-            eic <- eic[which(duplicated(eic[, 1]) == FALSE),]
-
-
             rt <- eic[, 1]
             int <- eic[, 2]
 
-
             int[which(is.na(int))] = 0
 
-            smoothed <- sgolayfilt(int, p = 3, n = 7)
-
-
             if(smoothing == TRUE){
+              smoothed <- sgolayfilt(int, p = 3, n = 7)
               int <- smoothed
               int[int < 0] <- 0
             }
 
-            border <- find_peak_points(rt, smoothed, dbData$tr[j])
+            border <- find_peak_points(rt, int, dbData$tr[j])
 
             x <- rt[border$left:border$right]
             y <- int[border$left:border$right]
@@ -823,8 +643,8 @@ tardis_peaks <-
               compound_info <- dbData[j,]
 
               # Append results to the data frame with compound information
-              results_samples <- rbind(
-                results_samples,
+              results_QCs_batch <- rbind(
+                results_QCs_batch,
                 data.frame(
                   Component = compound_info$ID,
                   Sample = sample_name,
@@ -842,8 +662,8 @@ tardis_peaks <-
               compound_info <- dbData[j,]
 
               # Append results to the data frame with compound information
-              results_samples <- rbind(
-                results_samples,
+              results_QCs_batch <- rbind(
+                results_QCs_batch,
                 data.frame(
                   Component = compound_info$ID,
                   Sample = sample_name,
@@ -857,12 +677,14 @@ tardis_peaks <-
                 )
               )
             }
-
           }
+
+
+
           # Create and save the plot for the current component
 
-          if (plots_samples == TRUE) {
-            plotSamples(
+          if (plots_QC == TRUE) {
+            plotQCs(
               compound_info,
               output_directory,
               rt_list,
@@ -874,104 +696,301 @@ tardis_peaks <-
             )
           }
 
-          if (diagnostic_plots == TRUE) {
-            plotDiagnostic(
-              compound_info,
-              output_directory,
-              rt_list,
-              int_list,
-              x_list,
-              y_list,
-              batchnr,
-              sample_names
-            )
+        }
+
+        results_QCs <- rbind(results_QCs, results_QCs_batch)
+
+
+        # Replace rtmed with average foundRT from previous results
+
+        new_rt_avg <- results_QCs_batch %>%
+          group_by(ID) %>%
+          summarise(mean = mean(foundRT), na.rm = TRUE)
+
+        dbData <- merge(dbData, new_rt_avg, by = "ID")
+
+        dbData$trold <- dbData$tr
+        dbData$tr <- new_rt_avg$mean
+
+        #If no RT is found, restore old RT
+
+        for (k in 1:dim(dbData[1])) {
+          if (is.na(dbData$tr[k]) == TRUE) {
+            dbData$tr[k] <- dbData$trold[k]
           }
         }
+
       }
 
+      #Next do the whole analysis for the samples in the same batch of the
+      # QCs to find ALL the compounds at the corrected RT. (SAMPLES + QCs)
 
-      results <- results_samples
 
-      if(is.null(max_int_filter) == FALSE && max_int_filter != 0){
-        results <- results[which(results$MaxInt >= max_int_filter),]
+      # data_samples <-
+      #   readMsExperiment(
+      #     spectraFiles = sample_files,
+      #     backend = MsBackendMzR(),
+      #     BPPARAM = SnowParam(workers = 1)
+      #   )
+
+      #Get sample data
+      data_samples <- data_batch
+      #data_samples <- data_batch[which(sampleData(data_batch)$sample_type ==
+      #"study")]
+
+
+      # data_samples <- adjustRtime(data_samples,param = ObiwarpParam())
+
+
+      all_sample_names <-
+        unlist(lapply(data_samples@sampleData$spectraOrigin, basename))
+
+
+
+
+      #Create ranges around new RT
+      ranges <- createRanges(data_samples, dbData, ppm, deltaTR)
+      mzRanges <- ranges[[1]]
+      rtRanges <- ranges[[2]]
+
+
+      if (mode == "lipidomics") {
+        spectra <- data_samples@spectra
+        spectra <- filterMzRange(spectra,mz = mass_range)
+        spectra <- filterEmptySpectra(spectra)
+      } else {
+        spectra <- data_samples@spectra
       }
 
-      #AUC, int, SNR & peakcor tables for each component peak in every sample
+      #Create empty data frame for sample results
+      results_samples <-
+        data.frame(
+          Component = character(0),
+          Sample = character(0),
+          AUC = numeric(0),
+          SNR = numeric(0),
+          peak_cor = numeric(0),
+          foundRT = numeric(0),
+          pop = numeric(0)
+        )
 
-      auc_table <- results %>%
-        select(Component, Sample, AUC) %>%
-        spread(Sample, AUC, fill = NA, drop = FALSE)
+      for (j in 1:nrow(rtRanges)) {
+        rt_list = list()
+        int_list = list()
+        x_list = list()
+        y_list = list()
 
-      write.csv(auc_table, file = paste0(output_directory, "auc_table.csv"))
-
-
-      pop_table <- results %>%
-        select(Component, Sample, pop) %>%
-        spread(Sample, pop, fill = NA, drop = FALSE)
-
-      write.csv(pop_table, file = paste0(output_directory, "pop_table.csv"))
-
-
-      SNR_table <- results %>%
-        select(Component, Sample, SNR) %>%
-        spread(Sample, SNR, fill = NA, drop = FALSE)
-
-      write.csv(SNR_table, file = paste0(output_directory, "snr_table.csv"))
-
-      int_table <- results %>%
-        select(Component, Sample, MaxInt) %>%
-        spread(Sample, MaxInt, fill = NA, drop = FALSE)
-
-      write.csv(int_table, file = paste0(output_directory, "int_table.csv"))
+        for (i in 1:length(all_sample_names)) {
+          sample_name <- all_sample_names[i]
+          # chromatograms <-
+          #   chromatogram(data_QC, rt = rtRanges[j, ], mz = mzRanges[j, ])
+          # rt <- chromatograms@.Data[[i]]@rtime
+          # int <- chromatograms@.Data[[i]]@intensity
 
 
-      peakcor_table <- results %>%
-        select(Component, Sample, peak_cor) %>%
-        spread(Sample, peak_cor, fill = NA, drop = FALSE)
-
-      write.csv(peakcor_table, file = paste0(output_directory, "peakcor_table.csv"))
-
-
-      #summarize feature table based on QC's
-
-      avg_metrics_table <- NULL
-
-      if(length(data_QC) != 0 ){
-
-        QC_results <-  results[grep("QC", results$Sample),]
-
-        avg_metrics_table <- QC_results %>%
-          group_by(Component) %>%
-          summarise_at(vars(-Sample), list( ~ if (is.numeric(.))
-            mean(., na.rm = TRUE)
-            else
-              first(.)))
+          sample_spectra <-
+            filterDataOrigin(spectra, unique(dataOrigin(spectra))[i])
+          sample_spectra <-
+            filterRt(sample_spectra, rtRanges[j,])
+          sample_spectra <-
+            filterMzRange(sample_spectra, mzRanges[j,])
 
 
 
-        lower_threshold <- 0.7
-        upper_threshold <- 0.8
-
-        # Create a new Excel workbook
-        wb <- createWorkbook()
-
-        # Add a worksheet to the workbook
-        sheet <- addWorksheet(wb, "Sheet1")
-
-        # Write the data.frame to the Excel worksheet
-        writeData(wb,
-                  sheet,
-                  avg_metrics_table,
-                  startCol = 1,
-                  startRow = 1)
+          sfs_agg <-
+            addProcessing(sample_spectra, .sum_intensities)
+          eic <-
+            cbind(rtime(sfs_agg),
+                  unlist(intensity(sfs_agg), use.names = FALSE))
 
 
+          eic <- eic[which(duplicated(eic[, 1]) == FALSE),]
 
-        # Save the Excel workbook to a file
-        saveWorkbook(wb,
-                     paste0(output_directory, "feat_table.xlsx"),
-                     overwrite = TRUE)
+
+          rt <- eic[, 1]
+          int <- eic[, 2]
+
+
+          int[which(is.na(int))] = 0
+
+          if(smoothing == TRUE){
+            smoothed <- sgolayfilt(int, p = 3, n = 7)
+            int <- smoothed
+            int[int < 0] <- 0
+          }
+
+          border <- find_peak_points(rt, int, dbData$tr[j])
+
+          x <- rt[border$left:border$right]
+          y <- int[border$left:border$right]
+
+          rt_list <- c(rt_list, list(rt))
+          int_list <- c(int_list, list(int))
+          x_list <- c(x_list, list(x))
+          y_list <- c(y_list, list(y))
+
+          # Check if there are at least two unique values for the component
+          if (length(unique(y)) > 1) {
+            # Calculate AUC
+            auc <- trapz(x, y)
+
+            pop <- length(x)
+            # Calculate QScore
+            qscore <- qscoreCalculator(x, y)
+
+            found_rt <- border$foundrt
+            max_int = int[border$peakindex]
+
+            # Get information about the current component from info_compounds
+            compound_info <- dbData[j,]
+
+            # Append results to the data frame with compound information
+            results_samples <- rbind(
+              results_samples,
+              data.frame(
+                Component = compound_info$ID,
+                Sample = sample_name,
+                AUC = auc,
+                MaxInt = max_int,
+                SNR = qscore[1],
+                peak_cor = qscore[2],
+                foundRT = found_rt,
+                pop = pop,
+                compound_info
+              )
+            )
+
+          } else {
+            compound_info <- dbData[j,]
+
+            # Append results to the data frame with compound information
+            results_samples <- rbind(
+              results_samples,
+              data.frame(
+                Component = compound_info$ID,
+                Sample = sample_name,
+                AUC = NA,
+                MaxInt = NA,
+                SNR = NA,
+                peak_cor = NA,
+                foundRT = NA,
+                pop = NA,
+                compound_info
+              )
+            )
+          }
+
+        }
+        # Create and save the plot for the current component
+
+        if (plots_samples == TRUE) {
+          plotSamples(
+            compound_info,
+            output_directory,
+            rt_list,
+            int_list,
+            x_list,
+            y_list,
+            batchnr,
+            sample_names
+          )
+        }
+
+        if (diagnostic_plots == TRUE) {
+          plotDiagnostic(
+            compound_info,
+            output_directory,
+            rt_list,
+            int_list,
+            x_list,
+            y_list,
+            batchnr,
+            sample_names
+          )
+        }
       }
-      return(list(auc_table, avg_metrics_table))
     }
+
+
+    results <- results_samples
+
+    if (is.null(max_int_filter) == FALSE && max_int_filter != 0) {
+      results <- results[which(results$MaxInt >= max_int_filter),]
+    }
+
+    #AUC, int, SNR & peakcor tables for each component peak in every sample
+
+    auc_table <- results %>%
+      select(Component, Sample, AUC) %>%
+      spread(Sample, AUC, fill = NA, drop = FALSE)
+
+    write.csv(auc_table, file = paste0(output_directory, "auc_table.csv"))
+
+
+    pop_table <- results %>%
+      select(Component, Sample, pop) %>%
+      spread(Sample, pop, fill = NA, drop = FALSE)
+
+    write.csv(pop_table, file = paste0(output_directory, "pop_table.csv"))
+
+
+    SNR_table <- results %>%
+      select(Component, Sample, SNR) %>%
+      spread(Sample, SNR, fill = NA, drop = FALSE)
+
+    write.csv(SNR_table, file = paste0(output_directory, "snr_table.csv"))
+
+    int_table <- results %>%
+      select(Component, Sample, MaxInt) %>%
+      spread(Sample, MaxInt, fill = NA, drop = FALSE)
+
+    write.csv(int_table, file = paste0(output_directory, "int_table.csv"))
+
+
+    peakcor_table <- results %>%
+      select(Component, Sample, peak_cor) %>%
+      spread(Sample, peak_cor, fill = NA, drop = FALSE)
+
+    write.csv(peakcor_table, file = paste0(output_directory,
+                                           "peakcor_table.csv"))
+
+
+    #summarize feature table based on QC's
+
+    avg_metrics_table <- NULL
+
+    if (length(data_QC) != 0 ) {
+
+      QC_results <-  results[grep("QC", results$Sample), ]
+
+      avg_metrics_table <- QC_results %>%
+        group_by(Component) %>%
+        summarise_at(vars(-Sample), list( ~ if (is.numeric(.))
+          mean(., na.rm = TRUE)
+          else
+            dplyr::first(.)))
+
+
+      # Create a new Excel workbook
+      wb <- createWorkbook()
+
+      # Add a worksheet to the workbook
+      sheet <- addWorksheet(wb, "Sheet1")
+
+      # Write the data.frame to the Excel worksheet
+      writeData(wb,
+                sheet,
+                avg_metrics_table,
+                startCol = 1,
+                startRow = 1)
+
+
+
+      # Save the Excel workbook to a file
+      saveWorkbook(wb,
+                   paste0(output_directory, "feat_table.xlsx"),
+                   overwrite = TRUE)
+    }
+    return(list(auc_table, avg_metrics_table))
   }
+}

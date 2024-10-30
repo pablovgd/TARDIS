@@ -1,6 +1,7 @@
 #' Diagnostic plots
 #'
-#' Function to make plots of QC samples to screen peak quality and retention time shifts.
+#' Function to make plots of QC samples to screen peak quality and retention
+#' time shifts.
 #'
 #' @param compound_info
 #' @param output_directory
@@ -15,7 +16,6 @@
 #' @import RColorBrewer
 
 
-
 plotDiagnostic <-
   function(compound_info,
            output_directory,
@@ -27,9 +27,7 @@ plotDiagnostic <-
            sample_names) {
     # Define colors for rt,int pairs and x,y pairs
 
-
-
-    if(length(grep("QC", sample_names)) != 0){
+    if (length(grep("QC", sample_names)) != 0) {
       #Select only the  QC's for plotting
       rt_list <- rt_list[grep("QC", sample_names)]
       int_list <- int_list[grep("QC", sample_names)]
@@ -63,16 +61,18 @@ plotDiagnostic <-
       sub <- compound_info$NAME
       plot_file <-
         paste("Component_", compound_info$ID, ".png", sep = "")
-      if(dir.exists(paste0(output_directory, "Diagnostic_QCs_Batch_", batchnr)) == FALSE){
+      if(dir.exists(paste0(output_directory, "Diagnostic_QCs_Batch_",
+                           batchnr)) == FALSE){
 
         dir.create(paste0(output_directory, "Diagnostic_QCs_Batch_", batchnr))
        }
-      png(filename = file.path(paste0(output_directory, "Diagnostic_QCs_Batch_", batchnr),
+      png(filename = file.path(paste0(output_directory, "Diagnostic_QCs_Batch_",
+                                      batchnr),
                                plot_file))
       par(mar = c(5.1, 4.1, 4.1, 10.1), xpd = TRUE)
       plot(
         NULL,
-        xlim = range(unlist(rt_list)/60, unlist(x_list)/60),
+        xlim = range(unlist(rt_list) / 60, unlist(x_list) / 60),
         ylim = c(0, max(unlist(int_list), unlist(y_list))),
         type = "n",
         main = plot_title,
@@ -92,14 +92,14 @@ plotDiagnostic <-
                       rt_int_color)
         #x_y_color)
       {
-        lines(rt/60, int, col = rt_int_color)      # Line plot for rt and int
-        points(rt/60, int, col = rt_int_color)     # Points for rt and int
+        lines(rt / 60, int, col = rt_int_color)      # Line plot for rt and int
+        points(rt / 60, int, col = rt_int_color)     # Points for rt and int
         a = x[1] #left integration border
         b = tail(x, 1) #right integration border
         index_a <- which.min(abs(rt - a))
         index_b <- which.min(abs(rt - b))
         polygon(
-          c(rt[index_a]/60, rt[index_a:index_b]/60, rt[index_b]/60),
+          c(rt[index_a] / 60, rt[index_a:index_b] / 60, rt[index_b] / 60),
           c(0, int[index_a:index_b], 0),
           col = adjustcolor(rt_int_color, alpha.f = 0.3),
           border = NA
@@ -128,7 +128,7 @@ plotDiagnostic <-
 
       dev.off()
 
-    }else{
+    } else {
 
       chunk_size <- 5
       num_chunks <- ceiling(length(rt_list) / chunk_size)
@@ -149,15 +149,17 @@ plotDiagnostic <-
         sub <- compound_info$NAME
         plot_file <-
           paste("Component_", compound_info$ID, ".png", sep = "")
-        if(dir.exists(paste0(output_directory, "evalbatch_", batchnr,i)) == FALSE){
+        if(dir.exists(paste0(output_directory, "evalbatch_", batchnr,i)) ==
+           FALSE){
           dir.create(paste0(output_directory, "evalbatch_", batchnr,i))
         }
-        png(filename = file.path(paste0(output_directory, "evalbatch_", batchnr,i),
+        png(filename = file.path(paste0(output_directory, "evalbatch_", batchnr,
+                                        i),
                                  plot_file))
         par(mar = c(5.1, 4.1, 4.1, 10.1), xpd = TRUE)
         plot(
           NULL,
-          xlim = range(unlist(rt_list_chunk)/60, unlist(x_list_chunk)/60),
+          xlim = range(unlist(rt_list_chunk) / 60, unlist(x_list_chunk) / 60),
           ylim = c(0, max(unlist(int_list_chunk), unlist(y_list_chunk))),
           type = "n",
           main = plot_title,
@@ -177,14 +179,14 @@ plotDiagnostic <-
                         rt_int_color)
           #x_y_color)
         {
-          lines(rt/60, int, col = rt_int_color)      # Line plot for rt and int
-          points(rt/60, int, col = rt_int_color)     # Points for rt and int
+          lines(rt / 60, int, col = rt_int_color)      # Line plot for rt and int
+          points(rt / 60, int, col = rt_int_color)     # Points for rt and int
           a = x[1] #left integration border
           b = tail(x, 1) #right integration border
           index_a <- which.min(abs(rt - a))
           index_b <- which.min(abs(rt - b))
           polygon(
-            c(rt[index_a]/60, rt[index_a:index_b]/60, rt[index_b]/60),
+            c(rt[index_a] / 60, rt[index_a:index_b] / 60, rt[index_b] / 60),
             c(0, int[index_a:index_b], 0),
             col = adjustcolor(rt_int_color, alpha.f = 0.3),
             border = NA
@@ -213,10 +215,7 @@ plotDiagnostic <-
 
         dev.off()
 
-
       }
-
-
 
     }
 
