@@ -87,7 +87,8 @@ tardis_peaks <-
            rt_alignment = TRUE,
            int_std_id,
            screening_mode = FALSE,
-           smoothing = TRUE) {
+           smoothing = TRUE,
+           max_int_filter = NULL) {
     results_samples <-
       data.frame(
         Component = character(0),
