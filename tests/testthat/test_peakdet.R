@@ -49,7 +49,7 @@ test_that("find_peak_points works", {
     expect_true(length(res) == 3)
     expect_equal(names(res), c("left", "right", "peak_index"))
     expect_equal(res, c(left = 2, right = 11, peak_index = 7))
-    
+
     ## multiple peaks
     ints <- c(4, 3, 5, 8, 7, 4, 1, 2, 1, 3, 1, 6, 10, 12, 11, 9, 7, 5, 1)
     ## first peak
@@ -63,7 +63,7 @@ test_that("find_peak_points works", {
     ## asking for first peak, getting second
     res <- find_peak_points(seq_along(ints), ints, targetRtime = 6)
     expect_equal(res, c(left = 11, right = 19, peak_index = 14))
-    
+
     ## NA in input
     ints <- c(4, 3, 5, 8, 7, 4, 1, 2, 1, 3, 1, 6, 10, 12, 11, 9, 7, 5, 1)
     ints[2] <- NA
@@ -79,6 +79,11 @@ test_that("find_peak_points works", {
     ints <- rep(1, 5)
     res <- find_peak_points(seq_along(ints), ints, 3)
     expect_equal(res, c(left = 1, right = 5, peak_index = 1))
+
+    ## intensities are all zero.
+    ints <- rep(0, 5)
+    res <- find_peak_points(seq_along(ints), ints, 3)
+    expect_equal(res, c(left = 1, right = 5, peak_index = 3))
 })
 
 ################################################################################
@@ -136,7 +141,7 @@ test_that("find_peak_points_orig works", {
     expect_equal(res, c(left_true = 2, right_true = 11, peakindex = 7))
     res_b <- find_peak_points(seq_along(ints), ints, 6)
     expect_equal(unname(res), unname(res_b))
-    
+
     ## multiple peaks
     ints <- c(4, 3, 4, 5, 8, 7, 4, 1, 2, 1, 3, 1, 6, 10, 12, 11, 9, 7, 5, 1)
     ## first peak
@@ -156,7 +161,7 @@ test_that("find_peak_points_orig works", {
     expect_equal(res, c(left_true = 12, right_true = 20, peakindex = 15))
     res_b <- find_peak_points(seq_along(ints), ints, 6)
     expect_equal(unname(res), unname(res_b))
-    
+
     ## NA in input
     ints <- c(4, 3, 5, 8, 7, 4, 1, 2, 1, 3, 1, 6, 10, 12, 11, 9, 7, 5, 1)
     ints[2] <- NA

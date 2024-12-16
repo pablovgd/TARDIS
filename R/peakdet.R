@@ -22,7 +22,7 @@
     right_true <- l
     if (index == 1)
         index <- index + 1
-    ## Search for TRUE to the left --> if sign changes and at least doens't
+    ## Search for TRUE to the left --> if sign changes and at least doesn't
     ## change at the next point
     for (i in (index - 1):1) {
         if (sign_change[i] && (index - i) >= min_dist) {
@@ -105,6 +105,8 @@ find_peak_points <- function(rtime = numeric(), intensity = numeric(),
     ## Find the local maximum closest to the targetRtime
     differences <- abs(rtime[local_max] - targetRtime)
     peak_index <- local_max[which.min(differences)]
+    if (isEmpty(peak_index))
+      peak_index <- which.min(abs(rtime - targetRtime))
     ## Find the left and right border points from the peak
     border <- .find_peak_border(sign_changes, peak_index, min_dist = 2)
     c(border, peak_index = peak_index)
