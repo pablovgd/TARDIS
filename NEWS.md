@@ -9,4 +9,5 @@
 - Setting intensity filter to zero disables to filter to retain `NA`.
 
 ## Changes in 0.1.2
-- Add warning flag to output for low quality peaks.
+- Various small fixes and typo corrections.
+- Added quick start vignette.
