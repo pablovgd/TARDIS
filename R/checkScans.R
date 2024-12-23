@@ -8,7 +8,6 @@
 #'
 #' @importFrom ProtGenerics dataOrigin
 #' @importFrom Spectra isEmpty
-#' @return
 #' @export
 #' @author Pablo Vangeenderhuysen
 checkScans <- function(spectra){
