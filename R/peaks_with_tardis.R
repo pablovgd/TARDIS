@@ -32,7 +32,9 @@
 #'     retention time alignment
 #' @param screening_mode `logical(1)` Run the algorithm over 5 QCs to quickly
 #'     check retention time shifts
-#' @param smoothing `logical(1)` Smooth the peaks with [sgolayfilt()],
+#' @param smoothing `logical(1)` Smooth the peaks with [sgolayfilt()]
+#' @param max_int_filter `numeric(1)` Disregard peaks with a max. int. lower
+#'     than this value
 #'
 #' @import MsExperiment
 #' @importFrom Spectra MsBackendMzR
