@@ -1,7 +1,7 @@
 ui <- bslib::page_navbar(
 
   shinyjs::useShinyjs(),  # Initialize shinyjs
-  title = div(img(src="tardis.png",height=100,width =100)),
+  title = div(img(src="tardis_new.png",height=100,width =100)),
   bg = "#003B6F",
   inverse = TRUE,
   bslib::nav_panel(title = "Create target list",
@@ -13,7 +13,7 @@ ui <- bslib::page_navbar(
                      selectInput("polarity", "Polarity:", choices = c("positive","negative")),
                      textInput("ion_column", "Name of ion column:", value = "ion"),
                      textInput("columns_of_interest", "Names of columns of interest (comma-separated):", value = "id, name, mz, rt"),
-                     actionButton("create_target_list", "Create Target List")
+                     actionButton("create_target_list", "Create target list")
               )
             )),
   bslib::nav_panel(title = "Targeted peak detection",
@@ -27,7 +27,8 @@ ui <- bslib::page_navbar(
                 ),
                 bslib::card(
                   numericInput("ppm", "PPM:", value = 5),
-                  selectInput("mode", "Mode:", choices = c("metabolomics","lipidomics")),
+                  #selectInput("mode", "Mode:", choices = c("metabolomics","lipidomics")),
+                  checkboxInput("range", "Custom mass range:", value = TRUE),
                   uiOutput("mass_low"),
                   uiOutput("mass_high"),
                   textInput("rtdev", "RT deviation:", value = "18"),
@@ -43,11 +44,11 @@ ui <- bslib::page_navbar(
                   checkboxInput("screening_mode", "Screening mode", value = FALSE),
                   checkboxInput("rt_alignment", "RT alignment", value = TRUE),
                   checkboxInput("smoothing", "Smoothing", value = TRUE),
-                  numericInput("max_int_filter", "Minimum peak intensity:", value = 10000)
+                  numericInput("max_int_filter", "Peak intensity filter:", value = NULL)
 
                 ),
                 bslib::card(
-                  actionButton("run_tardis_peaks", "Run T.A.R.D.I.S."),
+                  actionButton("run_tardis_peaks", "Run TARDIS"),
 
 
                 )

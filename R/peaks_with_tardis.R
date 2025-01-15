@@ -1,7 +1,7 @@
-#' @title T.A.R.D.I.S. Peak Detection
+#' @title TARDIS Peak Detection
 #'
 #' @description
-#' Main function of the T.A.R.D.I.S. package that is called in the Shiny app.
+#' Main function of the TARDIS package that is called in the Shiny app.
 #' Given data files and a list of targeted compounds it returns the area of
 #' those peaks, optional diagnostic plots and several other parameters.
 #' See vignette for a detailed tutorial.
@@ -72,7 +72,7 @@
 ## Pablo: Definitely something I should do, but I might do it a separate
 ## function, since for use with the GUI the file input is nice.
 
-tardis_peaks <-
+tardisPeaks <-
   function(file_path,
            dbData,
            ppm = 5,
