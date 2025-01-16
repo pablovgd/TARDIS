@@ -102,25 +102,25 @@ I limited the selection to 10 targets: 5 internal standards and 5 endogenous
 metabolites.
 
 ```{r}
-targets = targets[targets$ID %in% c(1576,1577,1578,1583,331,
-                            7,9,131,179,183),]
+targets = targets[targets$ID %in% c("1576","1577","1578","1583","331",
+                            "7","9","131","179","183"),]
 ```
 
 We can run screening mode using the argument `screening_mode = TRUE` in
 the tardis_peaks function.
 
 For more details on the inputs of the function, please read the help page
-`?tardis_peaks`
+`?tardisPeaks`
 
 ```{r warning=FALSE}
-results <- tardis_peaks(file_path = "vignette_data/mzML/",
+results <- tardisPeaks(file_path = "vignette_data/mzML/",
                         dbData = targets,
                         mass_range = NULL,
                         polarity = "positive",
                         output_directory = "vignette_data/output/screening/",
                         batch_positions = list(c(1,14)),
                         QC_pattern = "QC",
-                        int_std_id = c(1576,1577,1578,1583,331),
+                        int_std_id = c("1576","1577","1578","1583","331"),
                         screening_mode = TRUE)
 ```
 
