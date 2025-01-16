@@ -5,7 +5,8 @@
 \title{TARDIS Peak Detection}
 \usage{
 tardisPeaks(
-  file_path,
+  file_path = NULL,
+  lcmsData = NULL,
   dbData,
   ppm = 5,
   rtdev = 18,
@@ -26,8 +27,12 @@ tardisPeaks(
 )
 }
 \arguments{
-\item{file_path}{\code{character(1)}: path to the .mzML or .mzXML files
+\item{file_path}{\code{character(1)} Path to the .mzML or .mzXML files
 containing LC-MS data.}
+
+\item{lcmsData}{\code{MsExperiment} MsExperiment containing the data to be
+preprocessed. Sampledata should at least include run type and should
+match the later provided "QC" or "sample" pattern.}
 
 \item{dbData}{Output of \code{\link[=createTargetList]{createTargetList()}}}
 

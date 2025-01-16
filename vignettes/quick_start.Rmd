@@ -1,5 +1,5 @@
 ---
-title: "Quick start for targeted peak integration of LC-MS data using T.A.R.D.I.S."
+title: "Quick start for targeted peak integration of LC-MS data using TARDIS"
 author: "Pablo Vangeenderhuysen"
 date: "`r Sys.Date()`"
 output: 
@@ -7,7 +7,7 @@ output:
     toc: true
     toc_float: true
 vignette: >
-  %\VignetteIndexEntry{Quick start for Targeted peak integration of LC-MS data using T.A.R.D.I.S.}
+  %\VignetteIndexEntry{Quick start for Targeted peak integration of LC-MS data using TARDIS}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-`T.A.R.D.I.S.` offers an easy and straightforward way to automatically
+`TARDIS` offers an easy and straightforward way to automatically
 calculate area under the peak, max intensity and various quality metrics
 for targeted chemical compounds in LC-MS data. It makes use of an
 established retention time correction algorithm from the `xcms` package
@@ -36,7 +36,7 @@ See
 for installation instructions.
 
 This quick start guide will briefly demonstrate the main functionalities
-of `T.A.R.D.I.S.` using the command line interface. For details on the GUI we 
+of `TARDIS` using the command line interface. For details on the GUI we 
 refer to the `gui_tutorial ` vignette. For more information we refer 
 to *insert publication*.
 
@@ -54,7 +54,7 @@ compound:
     compound
 
 Extra columns can be included in the file, but will be ignored by
-`T.A.R.D.I.S.` unless otherwise indicated.
+`TARDIS` unless otherwise indicated.
 
 An input file (either .xlsx or .csv) can be converted to a correct
 data.frame using the `createTargetList()` function. 
@@ -90,8 +90,44 @@ The files in which the targets need to be detected are:
 list.files(path = "vignette_data/mzML/")
 ```
 The files are ordered in the folder by injection index, in this case, we
-have a total of 14 runs:two QC injections, followed by five sample injections, 
-two QC injections, five sample injections and two QC injections. 
+have a total of 14 runs:two QC injections, followed by four sample injections, 
+two QC injections, four sample injections and two QC injections. 
+
+Alternatively, instead of using file paths as input for TARDIS, the user can
+also use an `MsExperiment` object. Here it is necessary to include at least
+sample type in the sampleData to distinguish QC from sample runs. 
+
+**IMPORTANT!** The sampleData column has to be named `type`.
+
+
+```{r warning=FALSE}
+library(MsExperiment)
+files <- list.files(path = "vignette_data/mzML/",full.names = TRUE)
+ms_data <- readMsExperiment(files,
+                            backend = Spectra::MsBackendMzR())
+```
+
+```{r}
+ms_data
+```
+
+```{r}
+sampleData(ms_data)$type <- c("QC",
+              "QC",
+              "sample",
+              "sample",
+              "sample",
+              "sample",
+              "QC",
+              "QC",
+              "sample",
+              "sample",
+              "sample",
+              "sample",
+              "QC",
+              "QC")
+```
+
 
 # Screening mode
 
@@ -123,6 +159,20 @@ results <- tardisPeaks(file_path = "vignette_data/mzML/",
                         int_std_id = c("1576","1577","1578","1583","331"),
                         screening_mode = TRUE)
 ```
+Or, as mentioned, the MsExperiment object can be used as input instead.
+
+```{r}
+results <- tardisPeaks( lcmsData = ms_data, 
+                        dbData = targets,
+                        mass_range = NULL,
+                        polarity = "positive",
+                        output_directory = "vignette_data/output/screening/",
+                        batch_positions = list(c(1,14)),
+                        QC_pattern = "QC",
+                        int_std_id = c("1576","1577","1578","1583","331"),
+                        screening_mode = TRUE)
+```
+
 
 The resulting EICs are saved in the output folder and can be inspected:
 
@@ -140,9 +190,9 @@ knitr::include_graphics(c("vignette_data/output/screening/Diagnostic_QCs_Batch_1
                          ))
 ```
 
-Based on the EICs we can see that detection and integration were succesful, 
+Based on the EICs we can see that detection and integration were successful, 
 however,targets 1577 and 1583 are eluting towards the edge of our retention time
-windows, so we'll adjust their expected retention times to the ones were wee see
+windows, so we'll adjust their expected retention times to the ones were we see
 the peaks eluting.
 
 
@@ -158,14 +208,14 @@ Now we can perform peak detection in all our runs by setting
 
 
 ```{r warning=FALSE}
-results <- tardis_peaks(file_path = "vignette_data/mzML/",
+results <- tardisPeaks(lcmsData = ms_data,
                         dbData = targets,
                         mass_range = NULL,
                         polarity = "positive",
                         output_directory = "vignette_data/output/",
                         batch_positions = list(c(1,14)),
                         QC_pattern = "QC",
-                        int_std_id = c(1576,1577,1578,1583,331),
+                        int_std_id = c("1576","1577","1578","1583","331"),
                         screening_mode = FALSE)
 ```
 # Results

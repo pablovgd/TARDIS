@@ -5,7 +5,7 @@
 #' @param rt_range `numeric(2)` rt range of compound
 #' @param mz_range `numeric(2)` mz range of compound
 #' @returns returns filtered `Spectra` object
-filterSpectra <- function(spectra,dataOrigin,rt_range,mz_range) {
+filterSingle <- function(spectra,dataOrigin,rt_range,mz_range) {
   spectra <- spectra |>
     filterDataOrigin(dataOrigin) |>
     filterRt(rt_range) |>

@@ -6,8 +6,11 @@
 #' those peaks, optional diagnostic plots and several other parameters.
 #' See vignette for a detailed tutorial.
 #'
-#' @param file_path `character(1)`: path to the .mzML or .mzXML files
+#' @param file_path `character(1)` Path to the .mzML or .mzXML files
 #'     containing LC-MS data.
+#' @param lcmsData  `MsExperiment` MsExperiment containing the data to be
+#'     preprocessed. Sampledata should at least include run type and should
+#'     match the later provided "QC" or "sample" pattern.
 #' @param dbData Output of [createTargetList()]
 #' @param ppm `numeric(1)` Allowed deviance from given m/z of targets in ppm.
 #' @param rtdev `numeric(1)` Allowed deviance from given retention time of
@@ -73,7 +76,8 @@
 ## function, since for use with the GUI the file input is nice.
 
 tardisPeaks <-
-  function(file_path,
+  function(file_path = NULL,
+           lcmsData = NULL,
            dbData,
            ppm = 5,
            rtdev = 18,
@@ -111,8 +115,10 @@ tardisPeaks <-
         foundRT = numeric(0),
         pop = numeric(0)
       )
-    files <-
-      list.files(file_path, full.names = T, pattern = "mzML|mzXML")
+    if (is.null(file_path) == FALSE) {
+      files <-
+        list.files(file_path, full.names = T, pattern = "mzML|mzXML")
+    }
     if (is.null(mass_range) == FALSE) {
       dbData <-
         dbData[which(dbData$`m/z` < mass_range[2] &
@@ -130,13 +136,17 @@ tardisPeaks <-
           foundRT = numeric(0),
           pop = numeric(0)
         )
-      QC_files <-
-        files[grep(pattern = QC_pattern, files)]
-      data_QC <- MsExperiment::readMsExperiment(
-        spectraFiles = QC_files,
-        backend = MsBackendMzR(),
-        BPPARAM = SnowParam(workers = 1L)
-      )
+      if (is.null(file_path) == FALSE) {
+        QC_files <-
+          files[grep(pattern = QC_pattern, files)]
+        data_QC <- MsExperiment::readMsExperiment(
+          spectraFiles = QC_files,
+          backend = MsBackendMzR(),
+          BPPARAM = SnowParam(workers = 1L)
+        )
+      } else {
+        data_QC <- lcmsData[which(sampleData(lcmsData)$type == QC_pattern)]
+      }
       if (is.null(mass_range) == FALSE) {
         spectra_QC <- data_QC@spectra |>
           filterMzRange(mass_range) |>
@@ -144,7 +154,7 @@ tardisPeaks <-
       } else{
         spectra_QC <- data_QC@spectra
         }
-        checkScans(spectra_QC)
+      checkScans(spectra_QC)
 
       ## Create ranges for all compounds
       ranges <- createRanges(data_QC, dbData, ppm, rtdev)
@@ -174,7 +184,7 @@ tardisPeaks <-
           y_list = list()
           for (i in 1:length(sample_names)) {
             sample_name <- unlist(sample_names[i])
-            filtered_spectra <- filterSpectra(spectra_QC,
+            filtered_spectra <- filterSingle(spectra_QC,
                                              unique(dataOrigin(spectra_QC))[i],
                                              internal_standards_rt[j, ],
                                              internal_standards_mz[j, ])
@@ -233,7 +243,7 @@ tardisPeaks <-
         y_list = list()
         for (i in 1:length(sample_names)) {
           sample_name <- unlist(sample_names[i])
-          filtered_spectra <- filterSpectra(spectra_QC,
+          filtered_spectra <- filterSingle(spectra_QC,
                                             unique(dataOrigin(spectra_QC))[i],
                                             rtRanges[j, ],
                                             mzRanges[j, ])
@@ -332,20 +342,26 @@ tardisPeaks <-
             foundRT = numeric(0),
             pop = numeric(0)
           )
-        files_batch <-
-          files[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
-        data_batch <- readMsExperiment(
-          spectraFiles = files_batch,
-          backend = MsBackendMzR(),
-          BPPARAM = SnowParam(workers = 1)
-        )
+        if (is.null(file_path) == FALSE) {
+          files_batch <-
+            files[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
+          data_batch <- readMsExperiment(
+            spectraFiles = files_batch,
+            backend = MsBackendMzR(),
+            BPPARAM = SnowParam(workers = 1)
+          )
+        } else{
+          data_batch <- lcmsData[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
+        }
         checkScans(data_batch@spectra)
         #Define study and QC samples --> all not QC files are deemed study files
-        sampleData(data_batch)$sample_type <- "study"
-        sampleData(data_batch)$sample_type[grep(pattern = QC_pattern,
-                                                files_batch)] <- "QC"
+        if (is.null(file_path) == FALSE) {
+          sampleData(data_batch)$type <- "study"
+          sampleData(data_batch)$type[grep(pattern = QC_pattern,
+                                                  files_batch)] <- "QC"
+        }
         data_QC <-
-          data_batch[which(sampleData(data_batch)$sample_type == "QC")]
+          data_batch[which(sampleData(data_batch)$type == "QC")]
         if (is.null(mass_range == FALSE)) {
           spectra_QC <- data_QC@spectra |>
             filterMzRange(mass_range) |>
@@ -374,7 +390,7 @@ tardisPeaks <-
             y_list = list()
             for (i in 1:length(sample_names)) {
               sample_name <- unlist(sample_names[i])
-              spectra_filtered <- filterSpectra(spectra_QC,
+              spectra_filtered <- filterSingle(spectra_QC,
                 unique(dataOrigin(spectra_QC))[i],
                 internal_standards_rt[j, ],
                 internal_standards_mz[j, ])
@@ -402,7 +418,7 @@ tardisPeaks <-
               minFraction = 0.9,
               span = 0.5  ,
               peakGroupsMatrix = int_std,
-              subset = which(sampleData(data_batch)$sample_type == "QC")
+              subset = which(sampleData(data_batch)$type == "QC")
             )
           data_batch <- adjustRtime(data_batch, param = param)
           data_batch <- applyAdjustedRtime(data_batch)
@@ -411,7 +427,7 @@ tardisPeaks <-
         ## foundRT to search the compounds at that RT in the sample files
         ## Skip this step if there aren't any QC's available.
         data_QC <-
-          data_batch[which(sampleData(data_batch)$sample_type == "QC")]
+          data_batch[which(sampleData(data_batch)$type == "QC")]
         if (length(data_QC) != 0) {
           sample_names <-
             lapply(data_QC@sampleData$spectraOrigin, basename)
@@ -429,7 +445,7 @@ tardisPeaks <-
             y_list = list()
             for (i in 1:length(sample_names)) {
               sample_name <- unlist(sample_names[i])
-              filtered_spectra <- filterSpectra(spectra_QC,
+              filtered_spectra <- filterSingle(spectra_QC,
                                           unique(dataOrigin(spectra_QC))[i],
                                           rtRanges[j, ],
                                           mzRanges[j,])
@@ -541,7 +557,7 @@ tardisPeaks <-
           y_list = list()
           for (i in 1:length(sample_names)) {
             sample_name <- unlist(sample_names[i])
-            spectra_filtered <- filterSpectra(spectra,
+            spectra_filtered <- filterSingle(spectra,
                                               unique(dataOrigin(spectra))[i],
                                               rtRanges[j, ],
                                               mzRanges[j, ])

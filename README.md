@@ -46,7 +46,11 @@ library(TARDIS)
 ```
 
 
-**Read the vignette** for a tutorial on how to use `TARDIS`
+**Read the vignettes** for a tutorial on how to use `TARDIS`
+
+```
+RShowDoc("quick_start",package = "TARDIS")
+```
 
 ```
 RShowDoc("gui_tutorial",package = "TARDIS")

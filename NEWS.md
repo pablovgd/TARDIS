@@ -11,3 +11,7 @@
 ## Changes in 0.1.2
 - Various small fixes and typo corrections.
 - Added quick start vignette.
+- Fixed bug when intensities are all zero and/or constant.
+
+## Changes in 0.1.3
+- Added functionality to tardisPeaks to allow MsExperiment object as input.
