@@ -13,11 +13,17 @@ createRanges(msData, dbData, ppm, rtdev)
 
 \item{ppm}{allowed deviance in ppm around given m/z value}
 
-\item{rtdev}{allowed deviance in seconds of retention time. Defines the search window in the time dimension.}
+\item{rtdev}{allowed deviance in seconds of retention time. Defines the
+search window in the time dimension.}
 }
 \value{
-A list containing the m/z and retention time ranges for all given target compounds
+A list containing the m/z and retention time ranges for all given
+target compounds
 }
 \description{
-Creates ranges around given m/z and retention time based on given data and allowed deviance.
+Creates ranges around given m/z and retention time based on given data and
+allowed deviance.
+}
+\author{
+Pablo Vangeenderhuysen
 }

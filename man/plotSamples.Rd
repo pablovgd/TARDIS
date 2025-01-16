@@ -16,8 +16,25 @@ plotSamples(
 )
 }
 \arguments{
-\item{sample_names}{}
+\item{compound_info}{info for target compounds like name, id, ...}
+
+\item{output_directory}{\code{character(1)} directory to save plots.}
+
+\item{rt_list}{\code{list} list with retention times of complete window.}
+
+\item{int_list}{\code{list} list with intensities in complete window.}
+
+\item{x_list}{\code{list} list with retention times of integrated peak.}
+
+\item{y_list}{\code{list} list with intensities of integrated peak.}
+
+\item{batchnr}{\code{numeric(1)} batch number.}
+
+\item{sample_names}{names of samples.}
 }
 \description{
 Function to make plots of samples
+}
+\author{
+Pablo Vangeenderhuysen
 }

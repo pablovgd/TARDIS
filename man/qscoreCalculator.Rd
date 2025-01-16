@@ -6,6 +6,15 @@
 \usage{
 qscoreCalculator(rt, int)
 }
+\arguments{
+\item{rt}{\code{numeric} vector with retention times}
+
+\item{int}{\code{numeric} vector with corresponding intensities}
+}
 \description{
-Implementation of the work by William Kumler to calculate quality metrics: https://github.com/wkumler/MS_metrics
+Implementation of the work by William Kumler to calculate quality metrics:
+https://github.com/wkumler/MS_metrics
+}
+\author{
+William Kumler
 }

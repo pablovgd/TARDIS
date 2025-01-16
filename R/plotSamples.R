@@ -1,51 +1,47 @@
-#' Function to make plots of samples
+#' @title Function to make plots of samples
 #'
-#' @param compound_info
-#' @param output_directory
-#' @param rt_list
-#' @param int_list
-#' @param x_list
-#' @param y_list
-#' @param batchnr
-#' @param sample_names
+#' @param compound_info info for target compounds like name, id, ...
+#' @param output_directory `character(1)` directory to save plots.
+#' @param rt_list `list` list with retention times of complete window.
+#' @param int_list `list` list with intensities in complete window.
+#' @param x_list `list` list with retention times of integrated peak.
+#' @param y_list `list` list with intensities of integrated peak.
+#' @param batchnr `numeric(1)` batch number.
+#' @param sample_names names of samples.
 #'
 #' @import ggplot2
-#' @import RColorBrewer
+#' @importFrom RColorBrewer brewer.pal
+#'
+#' @author Pablo Vangeenderhuysen
+#'
+#' @export
 
-plotSamples <- function(compound_info, output_directory, rt_list, int_list, x_list, y_list, batchnr, sample_names) {
 
-  # Load necessary library
-  library(RColorBrewer)
-
+plotSamples <- function(compound_info, output_directory, rt_list, int_list,
+                        x_list, y_list, batchnr, sample_names) {
   # Generate colors for the plots
-  c25 <- RColorBrewer::brewer.pal(n = 5, "Set1")
-
+  c25 <-brewer.pal(n = 5, "Set1")
   # Create directory if it doesn't exist
   batch_dir <- paste0(output_directory, "Samplebatch_", batchnr)
   if (!dir.exists(batch_dir)) {
     dir.create(batch_dir)
   }
-
   # Split the data into groups of 5
   n <- length(rt_list)
   groups <- ceiling(n / 5)
-
   for (i in seq_len(groups)) {
     start_idx <- (i - 1) * 5 + 1
     end_idx <- min(i * 5, n)
-
     rt_subset <- rt_list[start_idx:end_idx]
     int_subset <- int_list[start_idx:end_idx]
     x_subset <- x_list[start_idx:end_idx]
     y_subset <- y_list[start_idx:end_idx]
     sample_names_subset <- sample_names[start_idx:end_idx]
-
     # Create file name for the plot
-    plot_file <- paste("Component_", compound_info$ID, "_part_", i, ".png", sep = "")
-
+    plot_file <- paste("Component_", compound_info$ID, "_part_", i, ".png",
+                       sep = "")
     # Define the output file path
     png(filename = file.path(batch_dir, plot_file))
-
     # Set up the plot with defined limits and labels
     plot(
       NULL,
@@ -57,7 +53,6 @@ plotSamples <- function(compound_info, output_directory, rt_list, int_list, x_li
       xlab = "Retention Time (minutes)",
       ylab = "Intensity"
     )
-
     # Plot lines and points using mapply with colors
     mapply(function(rt, int,x,y, rt_int_color) {
       lines(rt / 60, int, col = rt_int_color) # Line plot for rt and int
@@ -70,8 +65,8 @@ plotSamples <- function(compound_info, output_directory, rt_list, int_list, x_li
         c(0, int[index_a:index_b], 0),
         col = adjustcolor(rt_int_color, alpha.f = 0.3),
         border = NA)
-    }, rt_subset, int_subset, x_subset,y_subset, rt_int_color = c25[1:length(rt_subset)])
-
+    }, rt_subset, int_subset, x_subset,y_subset,
+    rt_int_color = c25[1:length(rt_subset)])
     # Add a legend to the plot
     legend(
       "topright",
@@ -82,7 +77,6 @@ plotSamples <- function(compound_info, output_directory, rt_list, int_list, x_li
       cex = 0.8,
       title = "Sample"
     )
-
     # Save the plot to file
     dev.off()
   }

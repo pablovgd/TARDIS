@@ -1,13 +1,15 @@
-#' Check if any samples are missing spectra
+#' @title  Check if any samples are missing spectra
+#' @description
+#' Display error if they do.
+#' Currently stops if a sample is detected that has less than 90% of the mean
+#' of spectra in all samples.
 #'
 #' @param spectra `Spectra` object
 #'
 #' @importFrom ProtGenerics dataOrigin
 #' @importFrom Spectra isEmpty
-#' @return
 #' @export
-#'
-#' @examples
+#' @author Pablo Vangeenderhuysen
 checkScans <- function(spectra){
   scans_per_sample <- table(dataOrigin(spectra))
   mean <- (mean(scans_per_sample))

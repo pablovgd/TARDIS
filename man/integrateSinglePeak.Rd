@@ -7,9 +7,20 @@
 integrateSinglePeak(file_path, rt, mz, ppm, rtdev, smoothing)
 }
 \arguments{
-\item{ppm}{description}
+\item{file_path}{\code{character(1)} path to .mzML or .mzXML file}
 
-\item{rtdev}{}
+\item{rt}{\code{numeric(1)} search retention time for target in minutes}
+
+\item{mz}{\code{numeric(1)} search m/z of target compound}
+
+\item{ppm}{\code{numeric(1)} allowed ppm deviance}
+
+\item{rtdev}{\code{numeric(1)} RT window in seconds}
+
+\item{smoothing}{\code{logical(1)} \code{TRUE} or \code{FALSE}}
+}
+\value{
+results of peak integration
 }
 \description{
 Integrate single chromatographic peak in single file

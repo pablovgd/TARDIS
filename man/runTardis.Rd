@@ -7,5 +7,6 @@
 runTardis()
 }
 \description{
-Launches the GUI of T.A.R.D.I.S. that allows to input all parameters in an intuitive way to perform targeted peak detection.
+Launches the GUI of T.A.R.D.I.S. that allows to input all parameters in an
+intuitive way to perform targeted peak detection.
 }

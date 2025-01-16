@@ -52,7 +52,7 @@ server <- function(input, output, session) {
   })
 
   output$mass_low <- renderUI({
-    if(input$mode == "lipidomics"){
+    if(input$range == TRUE){
       numericInput("mass_low","Mass range - lower limit",value = 67)
     } else {
       NULL
@@ -60,7 +60,7 @@ server <- function(input, output, session) {
   })
 
   output$mass_high <- renderUI({
-    if(input$mode == "lipidomics"){
+    if(input$range == TRUE){
       numericInput("mass_high","Mass range - upper limit",value = 1000)
     } else {
       NULL
@@ -91,26 +91,24 @@ server <- function(input, output, session) {
     }
 
 
-    tardis_output <- tardis_peaks(
+    tardis_output <- tardisPeaks(
       file_path = shinyFiles::parseDirPath(volumes,input$dir),
       dbData = targets$targets,
       ppm = as.numeric(input$ppm),
       rtdev = as.numeric(input$rtdev),
-      mode = input$mode,
       mass_range = c(input$mass_low,input$mass_high),
-      screening_mode = input$screening_mode,
       polarity = input$polarity,
       output_directory = paste0(shinyFiles::parseDirPath(volumes,input$dir_out),'/'),
       plots_samples = input$plot_samples,
       plots_QC = input$plot_QCs,
-      smoothing = input$smoothing,
       diagnostic_plots = input$diagnostic_plots,
-      batch_mode = TRUE,
       batch_positions =  result,
-      sample_pattern = input$sample_pattern,
       QC_pattern = input$QC_pattern,
+      sample_pattern = input$sample_pattern,
       rt_alignment = input$rt_alignment,
       int_std_id = unlist(strsplit(input$int_std_id, ",")),
+      screening_mode = input$screening_mode,
+      smoothing = input$smoothing,
       max_int_filter = input$max_int_filter
     )
 

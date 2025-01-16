@@ -3,16 +3,23 @@
 \name{renameRawFiles}
 \alias{renameRawFiles}
 \title{Rename Thermo .raw files
-Script to read XCalibur sequence list and rename files according to run type (sample, QC, blank, etc...)}
+Script to read XCalibur sequence list and rename files according to run type
+(sample, QC, blank, etc...)}
 \usage{
 renameRawFiles(data_path_raw_files, data_path_list)
 }
 \arguments{
-\item{data_path_raw_files}{path to raw files. Important: all runs from the sequence list need to have a corresponding .raw file in your input folder.}
+\item{data_path_raw_files}{path to raw files. Important: all runs from the
+sequence list need to have a corresponding .raw file in your input folder.}
 
-\item{data_path_list}{Path to exported sequence list in .csv format, all columns may be exported}
+\item{data_path_list}{Path to exported sequence list in .csv format,
+all columns may be exported}
 }
 \description{
 Rename Thermo .raw files
-Script to read XCalibur sequence list and rename files according to run type (sample, QC, blank, etc...)
+Script to read XCalibur sequence list and rename files according to run type
+(sample, QC, blank, etc...)
+}
+\author{
+Pablo Vangeenderhuysen
 }
