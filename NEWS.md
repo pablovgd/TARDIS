@@ -15,3 +15,6 @@
 
 ## Changes in 0.1.3
 - Added functionality to tardisPeaks to allow MsExperiment object as input.
+
+## Changes in 0.1.4
+- hotfix custom mass range.

@@ -81,7 +81,7 @@ tardisPeaks <-
            dbData,
            ppm = 5,
            rtdev = 18,
-           mass_range = c(67,1000),
+           mass_range = NULL,
            polarity = "positive",
            output_directory,
            plots_samples = FALSE,
@@ -155,7 +155,7 @@ tardisPeaks <-
         spectra_QC <- data_QC@spectra
         }
       checkScans(spectra_QC)
-
+      data_QC@spectra <- spectra_QC
       ## Create ranges for all compounds
       ranges <- createRanges(data_QC, dbData, ppm, rtdev)
       ## Get mz & rt ranges
@@ -229,13 +229,9 @@ tardisPeaks <-
         data_QC <- applyAdjustedRtime(data_QC)
       }
       #Find all targets in x QC's
-      if (is.null(mass_range) == FALSE) {
-        spectra_QC <- data_QC@spectra |>
-         filterMzRange(mass_range)
-         filterEmptySpectra()
-      } else{
-        spectra_QC <- data_QC@spectra
-      }
+
+      spectra_QC <- data_QC@spectra
+
       for (j in 1:dim(rtRanges)[1]) {
         rt_list = list()
         int_list = list()
