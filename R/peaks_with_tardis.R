@@ -196,7 +196,19 @@ tardisPeaks <-
             #imputed
             int[which(is.na(int))] = 0
             #To determine the borders more easily, smoothing is applied
-            smoothed <- sgolayfilt(int, p = 3, n = 7)
+            #if intensity length is under 7, lower filter length
+            # to odd number <= intensity length
+            if(length(int) < 7){
+              if(length(int) %% 2 == 0){
+                fl = length(int) - 1
+              }
+              else{
+                fl = length(int)
+              }
+            } else{
+              fl = 7
+            }
+            smoothed <- sgolayfilt(int, p = 3, n = fl)
             if (smoothing == TRUE) {
               int <- smoothed
               int[int < 0] <- 0
@@ -247,7 +259,19 @@ tardisPeaks <-
           rt <- eic[, 1L]
           int <- eic[, 2L]
           int[which(is.na(int))] = 0
-          smoothed <- sgolayfilt(int, p = 3, n = 7)
+          #if intensity length is under 7, lower filter length
+          # to odd number <= intensity length
+          if(length(int) < 7){
+            if(length(int) %% 2 == 0){
+              fl = length(int) - 1
+            }
+            else{
+              fl = length(int)
+            }
+          } else{
+            fl = 7
+          }
+          smoothed <- sgolayfilt(int, p = 3, n = fl)
           if (smoothing == TRUE) {
             int <- smoothed
             int[int < 0] <- 0
@@ -394,7 +418,19 @@ tardisPeaks <-
               rt <- eic[, 1L]
               int <- eic[, 2L]
               int[which(is.na(int))] = 0
-              smoothed <- sgolayfilt(int, p = 3, n = 7)
+              #if intensity length is under 7, lower filter length
+              # to odd number <= intensity length
+              if(length(int) < 7){
+                if(length(int) %% 2 == 0){
+                  fl = length(int) - 1
+                }
+                else{
+                  fl = length(int)
+                }
+              } else{
+                fl = 7
+              }
+              smoothed <- sgolayfilt(int, p = 3, n = fl)
               if (smoothing == TRUE) {
                 int <- smoothed
                 int[int < 0] <- 0
@@ -449,7 +485,19 @@ tardisPeaks <-
               rt <- eic[, 1L]
               int <- eic[, 2L]
               int[which(is.na(int))] = 0
-              smoothed <- sgolayfilt(int, p = 3, n = 7)
+              #if intensity length is under 7, lower filter length
+              # to odd number <= intensity length
+              if(length(int) < 7){
+                if(length(int) %% 2 == 0){
+                  fl = length(int) - 1
+                }
+                else{
+                  fl = length(int)
+                }
+              } else{
+                fl = 7
+              }
+              smoothed <- sgolayfilt(int, p = 3, n = fl)
               if (smoothing == TRUE) {
                 int <- smoothed
                 int[int < 0] <- 0
@@ -562,7 +610,19 @@ tardisPeaks <-
             rt <- eic[, 1L]
             int <- eic[, 2L]
             int[which(is.na(int))] = 0
-            smoothed <- sgolayfilt(int, p = 3, n = 7)
+            #if intensity length is under 7, lower filter length
+            # to odd number <= intensity length
+            if(length(int) < 7){
+              if(length(int) %% 2 == 0){
+                fl = length(int) - 1
+              }
+              else{
+                fl = length(int)
+              }
+            } else{
+              fl = 7
+            }
+            smoothed <- sgolayfilt(int, p = 3, n = fl)
             if (smoothing == TRUE) {
               int <- smoothed
               int[int < 0] <- 0

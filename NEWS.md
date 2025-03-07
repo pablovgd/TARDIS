@@ -18,3 +18,6 @@
 
 ## Changes in 0.1.4
 - hotfix custom mass range.
+
+## Changes in 0.1.5
+- Fix regarding issue #24
