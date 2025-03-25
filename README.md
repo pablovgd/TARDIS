@@ -22,6 +22,9 @@ For Xcode, you can run this line in your Mac OS terminal:
 sudo xcode-select --install
 ```
 
+For the latest version of `TARDIS`, `BiocManager` **version 3.20** is required:
+https://www.bioconductor.org/install/
+
 In R, run:
 
 ```
@@ -31,8 +34,7 @@ if (!require("devtools", quietly = TRUE))
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-devtools::install_github("pablovgd/TARDIS",build_vignettes = TRUE,
-  repos=c('http://cran.us.r-project.org',"http://bioconductor.org/packages/3.19/bioc"),
+BiocManager::install("pablovgd/TARDIS",build_vignettes = TRUE,
   dependencies=TRUE, type="source")
 
 ```
@@ -54,6 +56,10 @@ RShowDoc("quick_start",package = "TARDIS")
 
 ```
 RShowDoc("gui_tutorial",package = "TARDIS")
+```
+
+```
+RShowDoc("case_study",package = "TARDIS")
 ```
 
 To launch the GUI in R:
