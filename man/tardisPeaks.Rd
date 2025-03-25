@@ -10,7 +10,7 @@ tardisPeaks(
   dbData,
   ppm = 5,
   rtdev = 18,
-  mass_range = c(67, 1000),
+  mass_range = NULL,
   polarity = "positive",
   output_directory,
   plots_samples = FALSE,
