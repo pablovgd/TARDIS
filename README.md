@@ -25,6 +25,8 @@ sudo xcode-select --install
 For the latest version of `TARDIS`, `BiocManager` **version 3.20** is required:
 https://www.bioconductor.org/install/
 
+To build the vignettes, installation of the package `MsIO` is necessary.
+
 In R, run:
 
 ```
@@ -33,6 +35,8 @@ if (!require("devtools", quietly = TRUE))
 
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
+
+BiocManager::install("RforMassSpectrometry/MsIO")
 
 BiocManager::install("pablovgd/TARDIS",build_vignettes = TRUE,
   dependencies=TRUE, type="source")
