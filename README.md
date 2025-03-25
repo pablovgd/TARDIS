@@ -39,7 +39,7 @@ if (!require("BiocManager", quietly = TRUE))
 BiocManager::install("RforMassSpectrometry/MsIO")
 
 BiocManager::install("pablovgd/TARDIS",build_vignettes = TRUE,
-  dependencies=TRUE, type="source")
+  dependencies=TRUE)
 
 ```
 
