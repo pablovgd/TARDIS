@@ -24,3 +24,6 @@
 
 ## Changes in 0.1.6
 - Add case study vignette
+
+## Changes in 0.1.7
+- Fix issue #28

@@ -243,6 +243,8 @@ tardisPeaks <-
       #Find all targets in x QC's
 
       spectra_QC <- data_QC@spectra
+      sample_names <-
+        lapply(data_QC@sampleData$spectraOrigin, basename)
 
       for (j in 1:dim(rtRanges)[1]) {
         rt_list = list()

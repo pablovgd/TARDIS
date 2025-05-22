@@ -1,6 +1,6 @@
 Package: TARDIS
 Title: TArgeted Raw Data Integration In Spectrometry
-Version: 0.1.6
+Version: 0.1.7
 Authors@R:
     c(person(given = "Pablo",
              family = "Vangeenderhuysen",
