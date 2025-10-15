@@ -148,12 +148,13 @@ tardisPeaks <-
         data_QC <- lcmsData[which(sampleData(lcmsData)$type == QC_pattern)]
       }
       if (is.null(mass_range) == FALSE) {
-        spectra_QC <- data_QC@spectra |>
-          filterMzRange(mass_range) |>
-          filterEmptySpectra()
+        data_QC <- filterSpectra(data_QC,filterMzRange, mz = mass_range) |>
+          filterSpectra(filterEmptySpectra)
+
       } else{
-        spectra_QC <- data_QC@spectra
-        }
+        data_QC <- data_QC
+      }
+      spectra_QC <- data_QC@spectra
       checkScans(spectra_QC)
       data_QC@spectra <- spectra_QC
       ## Create ranges for all compounds
@@ -184,7 +185,7 @@ tardisPeaks <-
           y_list = list()
           for (i in 1:length(sample_names)) {
             sample_name <- unlist(sample_names[i])
-            filtered_spectra <- filterSingle(spectra_QC,
+            filtered_spectra <- TARDIS:::filterSingle(spectra_QC,
                                              unique(dataOrigin(spectra_QC))[i],
                                              internal_standards_rt[j, ],
                                              internal_standards_mz[j, ])
@@ -375,7 +376,16 @@ tardisPeaks <-
         } else{
           data_batch <- lcmsData[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
         }
-        checkScans(data_batch@spectra)
+        if (is.null(mass_range) == FALSE) {
+          data_batch <- filterSpectra(data_batch,filterMzRange, mz = mass_range) |>
+            filterSpectra(filterEmptySpectra)
+
+        } else{
+          data_batch <- data_batch
+        }
+        spectra_batch <- data_batch@spectra
+        checkScans(spectra_batch)
+        data_batch@spectra <- spectra_batch
         #Define study and QC samples --> all not QC files are deemed study files
         if (is.null(file_path) == FALSE) {
           sampleData(data_batch)$type <- "study"
