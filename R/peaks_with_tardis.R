@@ -761,6 +761,33 @@ tardisPeaks <-
         write_xlsx(avg_metrics_table,paste0(output_directory,
                                             "feat_table.xlsx"))
       }
+
+      # save input parameters to .csv
+
+      input_params <- data.frame(
+        "ppm" = .collapse_safe(ppm),
+        "rtdev" = .collapse_safe(rtdev),
+        "mass_range_low" = .collapse_safe(mass_range[1]),
+        "mass_range_high" = .collapse_safe(mass_range[2]),
+        "polarity" = .collapse_safe(polarity),
+        "batch_positions" = .collapse_safe(batch_positions),
+        "QC_pattern" = .collapse_safe(QC_pattern),
+        "sample_pattern" = .collapse_safe(sample_pattern),
+        "int_std_id" = .collapse_safe(int_std_id),
+        "screening_mode" = .collapse_safe(screening_mode),
+        "rt_alignment" = .collapse_safe(rt_alignment),
+        "plots_samples" = .collapse_safe(plots_samples),
+        "plots_QC" = .collapse_safe(plots_QC),
+        "diagnostic_plots" = .collapse_safe(diagnostic_plots),
+        "max_int_filter" = .collapse_safe(max_int_filter),
+        "smoothing" = .collapse_safe(smoothing),
+        stringsAsFactors = FALSE
+      )
+
+      write.csv(t(input_params),
+                file = paste0(output_directory, "input_params.csv"),
+                row.names = TRUE)
+
       return(list(auc_table, avg_metrics_table))
     }
   }
