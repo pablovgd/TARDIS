@@ -261,8 +261,7 @@ In the tab "Targeted peak detection", one can adjust the following parameters:
 
 * PPM: allowed *m/z* error in ppm
 
-* Mode: metabolomics or lipidomics
-    + In case of lipidomics or analysis with multiple mass-ranges at different time windows: enter the desired mass window
+* Custom mass range: In case of analysis with multiple mass-ranges at different time windows: enter the desired mass window, see quick start vignette.
 
 * RT deviation: search window visible to the peak picking algorithm around the expected RT (e.g. 18 means +- 9 seconds around the expected RT)
 
@@ -281,6 +280,8 @@ In the tab "Targeted peak detection", one can adjust the following parameters:
 * Generate QC plots: create plots for all the compounds in all the QC runs
 
 * Screening mode: fast processing mode that only processes 5 QC runs from beginning, middle and end of analysis
+
+* RT alignment: wether or not to perform RT alignment.
 
 * Smoothing: apply smoothing (attention! this also means that the quality metrics are computed for the smoothed peaks and not the raw data). For a first and honest look at data quality, I would advise to leave this off. 
 
