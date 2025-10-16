@@ -54,8 +54,8 @@ integrateSinglePeak <- function(file_path,rt,mz,ppm,rtdev,smoothing){
     int[int < 0] <- 0
   }
   border <- find_peak_points(rt, smoothed, dbData$tr)
-  x <- rt[border$left:border$right]
-  y <- int[border$left:border$right]
+  x <- rt[border["left"]:border["right"]]
+  y <- int[border["left"]:border["right"]]
   rt_list <- list(rt)
   int_list <- list(int)
   x_list <-  list(x)
@@ -63,8 +63,8 @@ integrateSinglePeak <- function(file_path,rt,mz,ppm,rtdev,smoothing){
   auc <- trapz(x, y)
   pop <- length(x)
   qscore <- qscoreCalculator(x, y)
-  found_rt <- border$foundrt
-  max_int = int[border$peakindex]
+  found_rt <- rt[border["peak_index"]]
+  max_int = int[border["peak_index"]]
   plot(
     NULL,
     xlim = range(unlist(rt_list)/60, unlist(x_list)/60),
