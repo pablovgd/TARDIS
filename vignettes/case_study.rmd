@@ -87,7 +87,7 @@ For more info on how to use the function, check the help page: `?createTargetLis
 
 Our biomarkers are defined as:
 
-```{r echo=TRUE}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 library(TARDIS)
 targets <- createTargetList("vignette_data/bio_targets.csv",
                             pos_pattern = "+",
@@ -104,7 +104,7 @@ For more information on how to load your data from the MetaboLights database, we
 [MsIO vignette](https://rformassspectrometry.github.io/MsIO/articles/MsIO.html#loading-data-from-metabolights).
 
 
-```{r echo=TRUE, warning=FALSE}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 library(MsExperiment)
 library(MsIO)
 library(MsBackendMetaboLights)
@@ -283,7 +283,7 @@ analysis using the results of TARDIS preprocessing.
 First, we use perform a principal component analysis (PCA) using the AUC's of
 our biomarkers:
 
-```{r echo=TRUE}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # Load required packages
 library(tidyverse)
 library(ggplot2)
