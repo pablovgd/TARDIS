@@ -34,3 +34,6 @@
 - Update documentation
 - Small changes in GUI
 
+## Changes in 1.0.1
+- Quick fix for integrateSinglePeak
+
