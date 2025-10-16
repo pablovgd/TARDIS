@@ -28,7 +28,7 @@ ui <- bslib::page_navbar(
                 bslib::card(
                   numericInput("ppm", "PPM:", value = 5),
                   #selectInput("mode", "Mode:", choices = c("metabolomics","lipidomics")),
-                  checkboxInput("range", "Custom mass range:", value = TRUE),
+                  checkboxInput("range", "Custom mass range: needed for data with >1 scan window!", value = TRUE),
                   uiOutput("mass_low"),
                   uiOutput("mass_high"),
                   textInput("rtdev", "RT deviation:", value = "18"),

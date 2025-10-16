@@ -148,12 +148,13 @@ tardisPeaks <-
         data_QC <- lcmsData[which(sampleData(lcmsData)$type == QC_pattern)]
       }
       if (is.null(mass_range) == FALSE) {
-        spectra_QC <- data_QC@spectra |>
-          filterMzRange(mass_range) |>
-          filterEmptySpectra()
+        data_QC <- filterSpectra(data_QC,filterMzRange, mz = mass_range) |>
+          filterSpectra(filterEmptySpectra)
+
       } else{
-        spectra_QC <- data_QC@spectra
-        }
+        data_QC <- data_QC
+      }
+      spectra_QC <- data_QC@spectra
       checkScans(spectra_QC)
       data_QC@spectra <- spectra_QC
       ## Create ranges for all compounds
@@ -184,7 +185,7 @@ tardisPeaks <-
           y_list = list()
           for (i in 1:length(sample_names)) {
             sample_name <- unlist(sample_names[i])
-            filtered_spectra <- filterSingle(spectra_QC,
+            filtered_spectra <- TARDIS:::filterSingle(spectra_QC,
                                              unique(dataOrigin(spectra_QC))[i],
                                              internal_standards_rt[j, ],
                                              internal_standards_mz[j, ])
@@ -243,6 +244,8 @@ tardisPeaks <-
       #Find all targets in x QC's
 
       spectra_QC <- data_QC@spectra
+      sample_names <-
+        lapply(data_QC@sampleData$spectraOrigin, basename)
 
       for (j in 1:dim(rtRanges)[1]) {
         rt_list = list()
@@ -373,7 +376,16 @@ tardisPeaks <-
         } else{
           data_batch <- lcmsData[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
         }
-        checkScans(data_batch@spectra)
+        if (is.null(mass_range) == FALSE) {
+          data_batch <- filterSpectra(data_batch,filterMzRange, mz = mass_range) |>
+            filterSpectra(filterEmptySpectra)
+
+        } else{
+          data_batch <- data_batch
+        }
+        spectra_batch <- data_batch@spectra
+        checkScans(spectra_batch)
+        data_batch@spectra <- spectra_batch
         #Define study and QC samples --> all not QC files are deemed study files
         if (is.null(file_path) == FALSE) {
           sampleData(data_batch)$type <- "study"
@@ -749,6 +761,33 @@ tardisPeaks <-
         write_xlsx(avg_metrics_table,paste0(output_directory,
                                             "feat_table.xlsx"))
       }
+
+      # save input parameters to .csv
+
+      input_params <- data.frame(
+        "ppm" = .collapse_safe(ppm),
+        "rtdev" = .collapse_safe(rtdev),
+        "mass_range_low" = .collapse_safe(mass_range[1]),
+        "mass_range_high" = .collapse_safe(mass_range[2]),
+        "polarity" = .collapse_safe(polarity),
+        "batch_positions" = .collapse_safe(batch_positions),
+        "QC_pattern" = .collapse_safe(QC_pattern),
+        "sample_pattern" = .collapse_safe(sample_pattern),
+        "int_std_id" = .collapse_safe(int_std_id),
+        "screening_mode" = .collapse_safe(screening_mode),
+        "rt_alignment" = .collapse_safe(rt_alignment),
+        "plots_samples" = .collapse_safe(plots_samples),
+        "plots_QC" = .collapse_safe(plots_QC),
+        "diagnostic_plots" = .collapse_safe(diagnostic_plots),
+        "max_int_filter" = .collapse_safe(max_int_filter),
+        "smoothing" = .collapse_safe(smoothing),
+        stringsAsFactors = FALSE
+      )
+
+      write.csv(t(input_params),
+                file = paste0(output_directory, "input_params.csv"),
+                row.names = TRUE)
+
       return(list(auc_table, avg_metrics_table))
     }
   }

@@ -38,7 +38,7 @@ for installation instructions.
 This quick start guide will briefly demonstrate the main functionalities
 of `TARDIS` using the command line interface. For details on the GUI we 
 refer to the `gui_tutorial ` vignette. For more information we refer 
-to *insert publication*.
+to the publication : https://pubs.acs.org/doi/10.1021/acs.analchem.5c00567.
 
 # Loading data
 
@@ -100,7 +100,7 @@ sample type in the sampleData to distinguish QC from sample runs.
 **IMPORTANT!** The sampleData column has to be named `type`.
 
 
-```{r warning=FALSE}
+```{r warning=FALSE, message = FALSE}
 library(MsExperiment)
 files <- list.files(path = "vignette_data/mzML/",full.names = TRUE)
 ms_data <- readMsExperiment(files,
@@ -128,6 +128,16 @@ sampleData(ms_data)$type <- c("QC",
               "QC")
 ```
 
+# Data with multiple scan windows
+
+**IMPORTANT!** if your data contains multiple (overlapping) *m/z* scan windows,
+it is nescessary to analyze these seperatly through the "mass_range" argument. 
+If not, you will notice that peaks will have a sawtooth profile, because of the
+filtering of empty spectra within TARDIS. 
+
+```{r,out.width="49%" }
+knitr::include_graphics("vignette_data/plots/sawtooth.png")
+```
 
 # Screening mode
 

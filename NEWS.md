@@ -24,3 +24,13 @@
 
 ## Changes in 0.1.6
 - Add case study vignette
+
+## Changes in 0.1.7
+- Fix issue #28
+
+## Changes in 1.0.0
+- Fix issue #32
+- Implement output of input parameters, see issue #33
+- Update documentation
+- Small changes in GUI
+
