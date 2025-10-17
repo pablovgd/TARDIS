@@ -286,6 +286,7 @@ our biomarkers:
 ```{r echo=TRUE, warning=FALSE, message=FALSE}
 # Load required packages
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 # Limit input data to biomarkers and not ISTD targets
 data <- AUC[4:9,]
