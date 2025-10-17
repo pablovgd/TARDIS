@@ -41,6 +41,8 @@ Suggests:
     testthat,
     MsIO,
     MsBackendMetaboLights
+Remotes:
+    rformassspectrometry/MsIO
 biocViews: Infrastructure, Software, Metabolomics, MassSpectrometry
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
