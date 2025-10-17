@@ -40,8 +40,7 @@ Suggests:
     knitr,
     testthat,
     MsIO,
-    MsBackendMetaboLights,
-    tidyverse
+    MsBackendMetaboLights
 Remotes:
     rformassspectrometry/MsIO
 biocViews: Infrastructure, Software, Metabolomics, MassSpectrometry
