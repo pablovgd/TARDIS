@@ -1,0 +1,35 @@
+citHeader("To cite the TARDIS package in publications use:")
+
+citEntry(
+  entry = "article",
+  title = "Automated Integration and Quality Assessment of Chromatographic Peaks in LC???MS-Based Metabolomics and Lipidomics Using TARDIS",
+  author = personList(
+    person("Pablo", "Vangeenderhuysen"),
+    person("Matthijs", "Vynck"),
+    person("Beata", "Pomian"),
+    person("Kimberly", "De Windt"),
+    person("Emile", "Callemeyn"),
+    person("Ellen", "De Paepe"),
+    person("Lindsey", "De Commer"),
+    person("Jeroen", "Raes"),
+    person("Tim", "Nawrot"),
+    person("Johannes", "Rainer"),
+    person("Lieselot Y.", "Hemeryck"),
+    person("Lynn", "Vanhaecke")
+  ),
+  journal = "Analytical Chemistry",
+  year = "2025",
+  volume = "97",
+  number = "18",
+  pages = "9927???9934",
+  doi = "10.1021/acs.analchem.5c00567",
+  url = "https://doi.org/10.1021/acs.analchem.5c00567",
+  note = "PMID: 40296498",
+  textVersion = paste(
+    "Vangeenderhuysen P, Vynck M, Pomian B, De Windt K, Callemeyn E, De Paepe E,",
+    "De Commer L, Raes J, Nawrot T, Rainer J, Hemeryck LY, Vanhaecke L (2025).",
+    "\"Automated Integration and Quality Assessment of Chromatographic Peaks in LC???MS-Based Metabolomics and Lipidomics Using TARDIS.\"",
+    "Analytical Chemistry, 97(18), 9927???9934.",
+    "doi:10.1021/acs.analchem.5c00567."
+  )
+)
