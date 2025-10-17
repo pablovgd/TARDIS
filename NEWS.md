@@ -28,6 +28,8 @@
 ## Changes in 0.1.7
 - Fix issue #28
 
+# TARDIS 1.0
+
 ## Changes in 1.0.0
 - Fix issue #32
 - Implement output of input parameters, see issue #33

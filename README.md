@@ -2,7 +2,7 @@
 [![R-CMD-check](https://github.com/pablovgd/TARDIS/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel)](https://github.com/pablovgd/TARDIS/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-# TARDIS <img src="https://github.com/pablovgd/T.A.R.D.I.S./blob/main/www/tardis.png" width="150" height="150" align = right />        
+# TARDIS <img src="man/figures/tardis.png" width="150" height="150" align = right />        
 
 R package for *TArgeted Raw Data Integration In Spectrometry*
 
@@ -78,4 +78,4 @@ runTardis()
 
 As a summary, the GPLv3 license requires attribution, inclusion of copyright and license information, disclosure of source code and changes. Derivative work must be available under the same terms.
 
-© Pablo Vangeenderhuysen (2024)
+B) Pablo Vangeenderhuysen (2024)
