@@ -40,7 +40,7 @@ Suggests:
     knitr,
     testthat,
     MsIO,
-    MsBackendMetaboLights
+    MsBackendMetaboLights,
     tidyverse
 Remotes:
     rformassspectrometry/MsIO
