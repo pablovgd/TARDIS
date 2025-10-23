@@ -1,6 +1,6 @@
 Package: TARDIS
 Title: TArgeted Raw Data Integration In Spectrometry
-Version: 1.0.1
+Version: 1.1.0
 Authors@R:
     c(person(given = "Pablo",
              family = "Vangeenderhuysen",
@@ -35,7 +35,8 @@ Imports:
     tidyr (>= 1.3.1),
     xcms (>= 4.1.8),
     ProtGenerics (>= 1.36.0),
-    writexl (>= 1.5.0)
+    writexl (>= 1.5.0),
+    S4Vectors (>= 0.43.2)
 Suggests:
     knitr,
     testthat,
@@ -46,6 +47,6 @@ Remotes:
 biocViews: Infrastructure, Software, Metabolomics, MassSpectrometry
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 URL: https://pablovgd.github.io/TARDIS/
