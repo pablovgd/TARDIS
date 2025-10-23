@@ -48,6 +48,7 @@
 #' @importFrom Spectra filterPolarity
 #' @importFrom Spectra dataOrigin
 #' @importFrom Spectra addProcessing
+#' @importFrom Spectra Spectra
 #' @importFrom signal sgolayfilt
 #' @importFrom xcms PeakGroupsParam
 #' @importFrom xcms adjustRtime
