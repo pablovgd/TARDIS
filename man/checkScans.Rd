@@ -10,8 +10,8 @@ checkScans(spectra)
 \item{spectra}{\code{Spectra} object}
 }
 \description{
-Display error if they do.
-Currently stops if a sample is detected that has less than 90\% of the mean
+Display warning if they do.
+Currently warns user if a sample is detected that has less than 50\% of the mean
 of spectra in all samples.
 }
 \author{

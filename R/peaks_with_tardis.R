@@ -45,8 +45,10 @@
 #' @importFrom Spectra filterEmptySpectra
 #' @importFrom Spectra filterDataOrigin
 #' @importFrom Spectra filterRt
+#' @importFrom Spectra filterPolarity
 #' @importFrom Spectra dataOrigin
 #' @importFrom Spectra addProcessing
+#' @importFrom Spectra Spectra
 #' @importFrom signal sgolayfilt
 #' @importFrom xcms PeakGroupsParam
 #' @importFrom xcms adjustRtime
@@ -62,6 +64,7 @@
 #' @importFrom dplyr group_by
 #' @importFrom dplyr select
 #' @importFrom dplyr first
+#' @importFrom S4Vectors DataFrame
 #'
 #' @return returns `list` with auc table and feature table with summarized
 #'     stats per compound. Outputs plots and other tables to output folder.
@@ -119,6 +122,17 @@ tardisPeaks <-
       files <-
         list.files(file_path, full.names = T, pattern = "mzML|mzXML")
     }
+    if (is.null(lcmsData) == FALSE){
+      if(polarity == "positive"){
+        spectra(lcmsData) <- filterPolarity(spectra(lcmsData), 1)
+      } else if (polarity == "negative"){
+        spectra(lcmsData) <- filterPolarity(spectra(lcmsData), 0)
+      }
+      suppressWarnings(
+        lcmsData <- linkSampleData(
+          lcmsData, with = "sampleData.raw_file = spectra.dataOrigin")
+      )
+    }
     if (is.null(mass_range) == FALSE) {
       dbData <-
         dbData[which(dbData$`m/z` < mass_range[2] &
@@ -139,11 +153,31 @@ tardisPeaks <-
       if (is.null(file_path) == FALSE) {
         QC_files <-
           files[grep(pattern = QC_pattern, files)]
-        data_QC <- MsExperiment::readMsExperiment(
-          spectraFiles = QC_files,
-          backend = MsBackendMzR(),
-          BPPARAM = SnowParam(workers = 1L)
-        )
+
+        data_QC <- MsExperiment()
+        experimentFiles(data_QC) <-
+          MsExperimentFiles(
+            mzML = setNames(QC_files,
+                            basename(tools::file_path_sans_ext(QC_files)))
+          )
+
+        sampleData(data_QC) <- DataFrame(sample_index = 1:length(QC_files),
+                                         spectraOrigin = QC_files)
+        sampleData(data_QC)$type <- "QC"
+
+        sp <- Spectra(experimentFiles(data_QC)[["mzML"]],
+                      backend = MsBackendMzR(),
+                      BPPARAM = SnowParam(workers = 1L))
+
+        if(polarity == "positive"){
+          spectra(data_QC) <- filterPolarity(sp, 1)
+        } else if (polarity == "negative"){
+          spectra(data_QC) <- filterPolarity(sp, 0)
+        }
+
+        sampleData(data_QC)$raw_file <- normalizePath(QC_files)
+        data_QC <- linkSampleData(
+          data_QC, with = "sampleData.raw_file = spectra.dataOrigin")
       } else {
         data_QC <- lcmsData[which(sampleData(lcmsData)$type == QC_pattern)]
       }
@@ -368,11 +402,33 @@ tardisPeaks <-
         if (is.null(file_path) == FALSE) {
           files_batch <-
             files[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
-          data_batch <- readMsExperiment(
-            spectraFiles = files_batch,
-            backend = MsBackendMzR(),
-            BPPARAM = SnowParam(workers = 1)
-          )
+
+          data_batch <- MsExperiment()
+          experimentFiles(data_batch) <-
+            MsExperimentFiles(
+              mzML = setNames(files_batch,
+                              basename(tools::file_path_sans_ext(files_batch)))
+            )
+
+          sampleData(data_batch) <- DataFrame(sample_index = 1:length(files_batch),
+                                              spectraOrigin = files_batch)
+          #Define study and QC samples --> all not QC files are deemed study files
+          sampleData(data_batch)$type <- "study"
+          sampleData(data_batch)$type[grep(pattern = QC_pattern,
+                                           files_batch)] <- "QC"
+
+          sp <- Spectra(experimentFiles(data_batch)[["mzML"]],
+                        backend = MsBackendMzR(),
+                        BPPARAM = SnowParam(workers = 1L))
+          if(polarity == "positive"){
+            spectra(data_batch) <- filterPolarity(sp, 1)
+          } else if (polarity == "negative"){
+            spectra(data_batch) <- filterPolarity(sp, 0)
+          }
+
+          sampleData(data_batch)$raw_file <- normalizePath(files_batch)
+          data_batch <- linkSampleData(
+            data_batch, with = "sampleData.raw_file = spectra.dataOrigin")
         } else{
           data_batch <- lcmsData[batch_positions[[batchnr]][1]:batch_positions[[batchnr]][2]]
         }
@@ -386,12 +442,7 @@ tardisPeaks <-
         spectra_batch <- data_batch@spectra
         checkScans(spectra_batch)
         data_batch@spectra <- spectra_batch
-        #Define study and QC samples --> all not QC files are deemed study files
-        if (is.null(file_path) == FALSE) {
-          sampleData(data_batch)$type <- "study"
-          sampleData(data_batch)$type[grep(pattern = QC_pattern,
-                                                  files_batch)] <- "QC"
-        }
+
         data_QC <-
           data_batch[which(sampleData(data_batch)$type == "QC")]
         if (is.null(mass_range == FALSE)) {
@@ -583,7 +634,7 @@ tardisPeaks <-
           dbData$trold <- dbData$tr
           dbData$tr <- new_rt_avg$mean
           ## If no RT is found, restore old RT
-          for (k in 1:dim(dbData[1])) {
+          for (k in 1:dim(dbData)[1]) {
             if (is.na(dbData$tr[k]) == TRUE) {
               dbData$tr[k] <- dbData$trold[k]
             }
