@@ -14,7 +14,7 @@ Authors@R:
 	   person(given = "Matthijs", family = "Vynck",
 	   email = "Matthijs.Vynck@UGent.be",
 	   role = "ctb",
-	   comment = c(ORCID = "0000-0001-9875-385X")),
+	   comment = c(ORCID = "0000-0001-9875-385X"))
 	   )
 Description: TARDIS was created to extract targeted chromatographic
     peak data from LC-MS experiments. It makes use of the 'Spectra'
