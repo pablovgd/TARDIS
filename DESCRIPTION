@@ -2,11 +2,20 @@ Package: TARDIS
 Title: TArgeted Raw Data Integration In Spectrometry
 Version: 1.0.1
 Authors@R:
-    c(person(given = "Pablo",
-             family = "Vangeenderhuysen",
-	     email = "pablovangeenderhuysen@ugent.be",
-	     role = c("aut", "cre"),
-             comment = c(ORCID = "0000-0002-5492-6904")))
+    c(
+     person(given = "Pablo", family = "Vangeenderhuysen",
+	   email = "pablovangeenderhuysen@ugent.be",
+	   role = c("aut", "cre"),
+     comment = c(ORCID = "0000-0002-5492-6904")),
+     person(given = "Johannes", family = "Rainer",
+	   email = "johannes.rainer@eurac.edu",
+	   role ="ctb",
+	   comment = c(ORCID = "0000-0002-6977-7147")),
+	   person(given = "Matthijs", family = "Vynck",
+	   email = "Matthijs.Vynck@UGent.be",
+	   role = "ctb",
+	   comment = c(ORCID = "0000-0001-9875-385X")),
+	   )
 Description: TARDIS was created to extract targeted chromatographic
     peak data from LC-MS experiments. It makes use of the 'Spectra'
     package in order to be future-proof and exist within the
