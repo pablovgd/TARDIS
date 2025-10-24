@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Targeted peak integration of LC-MS data using T.A.R.D.I.S. • TARDIS</title>
+<title>Targeted peak integration of LC-MS data using TARDIS • TARDIS</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Targeted peak integration of LC-MS data using T.A.R.D.I.S.">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Targeted peak integration of LC-MS data using TARDIS">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -34,7 +34,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/case_study.html">Case study: targeted metabolite detection using TARDIS in cardiovascular disease</a></li>
-    <li><a class="dropdown-item" href="../articles/gui_tutorial.html">Targeted peak integration of LC-MS data using T.A.R.D.I.S.</a></li>
+    <li><a class="dropdown-item" href="../articles/gui_tutorial.html">Targeted peak integration of LC-MS data using TARDIS</a></li>
     <li><a class="dropdown-item" href="../articles/quick_start.html">Quick start for targeted peak integration of LC-MS data using TARDIS</a></li>
   </ul>
 </li>
@@ -57,11 +57,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Targeted peak integration of LC-MS data using T.A.R.D.I.S.</h1>
+      <h1>Targeted peak integration of LC-MS data using TARDIS</h1>
                         <h4 data-toc-skip class="author">Pablo
 Vangeenderhuysen</h4>
             
-            <h4 data-toc-skip class="date">2025-10-23</h4>
+            <h4 data-toc-skip class="date">2025-10-24</h4>
       
 
       <div class="d-none name"><code>gui_tutorial.rmd</code></div>
@@ -72,30 +72,39 @@ Vangeenderhuysen</h4>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p><code>T.A.R.D.I.S.</code> is an R package developed by Pablo
-Vangeenderhuysen at LIMET, Ghent University. <code>T.A.R.D.I.S.</code>
-offers an easy and straightforward way to automatically calculate area
-under the peak, max intensity and various quality metrics for targeted
+<p><code>TARDIS</code> is an R package developed by Pablo
+Vangeenderhuysen at LIMET, Ghent University. <code>TARDIS</code> offers
+an easy and straightforward way to automatically calculate area under
+the peak, max intensity and various quality metrics for targeted
 chemical compounds in LC-MS data. It makes use of an established
 retention time correction algorithm from the <code>xcms</code> package
 and loads MS data as <code>Spectra</code> objects so it’s easily
 integrated with other tools of the <em>Rformassspectrometry</em>
 initiative.</p>
-<p>See <a href="https://github.com/pablovgd/T.A.R.D.I.S./blob/main/README.md" class="external-link">README</a>
+<p>See <a href="https://github.com/pablovgd/TARDIS/blob/main/README.md" class="external-link">README</a>
 for installation instructions.</p>
-<p>This tutorial explains the basic functionality of
-<code>T.A.R.D.I.S.</code> and how to use the Shiny GUI. It’s advised to
-read this tutorial until the end before using <code>T.A.R.D.I.S.</code>
-to understand how the tool works and what kind of input is needed.</p>
+<p>This tutorial explains the basic functionality of <code>TARDIS</code>
+and how to use the Shiny GUI. It’s advised to read this tutorial until
+the end before using <code>TARDIS</code> to understand how the tool
+works and what kind of input is needed.</p>
 </div>
 <div class="section level2">
-<h2 id="targeted-data-processing-with-t-a-r-d-i-s-">Targeted data processing with T.A.R.D.I.S.<a class="anchor" aria-label="anchor" href="#targeted-data-processing-with-t-a-r-d-i-s-"></a>
+<h2 id="targeted-data-processing-with-tardis">Targeted data processing with TARDIS<a class="anchor" aria-label="anchor" href="#targeted-data-processing-with-tardis"></a>
 </h2>
+<div class="section level3">
+<h3 id="file-conversion">File conversion<a class="anchor" aria-label="anchor" href="#file-conversion"></a>
+</h3>
+<p>Input files need to be converted to the .mzML format and have to be
+centroided. Polarity filtering is done within <code>TARDIS</code>, so no
+polarity subsetting has to be performed when converting the files. For
+file conversion using MSConvert (ProteoWizard) we refer to to mzmine
+documentation: <a href="https://mzmine.github.io/mzmine_documentation/data_conversion.html" class="external-link uri">https://mzmine.github.io/mzmine_documentation/data_conversion.html</a></p>
+</div>
 <div class="section level3">
 <h3 id="the-general-workflow">The general workflow<a class="anchor" aria-label="anchor" href="#the-general-workflow"></a>
 </h3>
-<p><code>T.A.R.D.I.S.</code> was developed as an open-source alternative
-for targeted peak integration using simple and interpretable algorithms.
+<p><code>TARDIS</code> was developed as an open-source alternative for
+targeted peak integration using simple and interpretable algorithms.
 It’s general workflow is as follows:</p>
 <ul>
 <li>Create a target list</li>
@@ -121,7 +130,7 @@ for each compound:</p>
 compound</li>
 </ul>
 <p>Extra columns can be included in the file, but will be ignored by
-<code>T.A.R.D.I.S.</code> unless otherwise indicated.</p>
+<code>TARDIS</code> unless otherwise indicated.</p>
 <p>An input file (either .xlsx or .csv) can be converted to a correct
 data.frame using the <code><a href="../reference/createTargetList.html">createTargetList()</a></code> function (not
 needed if using the GUI). Input parameters needed are: the path to the
@@ -318,10 +327,10 @@ the adjusted RT.</p>
 a different time in QC runs at the beginning of the analysis (left),
 compared to QC runs at the end of the analysis (right). In order to
 avoid having to manually provide expected RT for every batch,
-<code>T.A.R.D.I.S.</code> will detect that the peak apex is now closer
-to a RT of 440 seconds (7.3 minutes) and thus when finally processing
-that batch the expected RT for that compound will be approximately 440
-seconds instead of 446 seconds.</p>
+<code>TARDIS</code> will detect that the peak apex is now closer to a RT
+of 440 seconds (7.3 minutes) and thus when finally processing that batch
+the expected RT for that compound will be approximately 440 seconds
+instead of 446 seconds.</p>
 <p><img src="vignette_data/plots/rtshift1.png" width="45%"><img src="vignette_data/plots/rtshift2.png" width="45%"></p>
 </div>
 <div class="section level4">
@@ -446,12 +455,12 @@ excluded from the results (NA in results table).</p></li>
 <div class="section level2">
 <h2 id="issues-and-feature-requests">Issues and feature requests<a class="anchor" aria-label="anchor" href="#issues-and-feature-requests"></a>
 </h2>
-<p><code>T.A.R.D.I.S.</code> will receive periodical updates including
+<p><code>TARDIS</code> will receive periodical updates including
 improvements and/or new features based on the need of the users. If you
 encounter an error, or any other problem, feel free to create an issue
-on Github. Got an idea yourself to improve <code>T.A.R.D.I.S.</code>?
-Feature requests are also more than welcome.</p>
-<p><a href="https://github.com/pablovgd/T.A.R.D.I.S./issues" class="external-link uri">https://github.com/pablovgd/T.A.R.D.I.S./issues</a></p>
+on Github. Got an idea yourself to improve <code>TARDIS</code>? Feature
+requests are also more than welcome.</p>
+<p><a href="https://github.com/pablovgd/TARDIS/issues" class="external-link uri">https://github.com/pablovgd/TARDIS/issues</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

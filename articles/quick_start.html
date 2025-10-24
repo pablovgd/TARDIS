@@ -34,7 +34,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/case_study.html">Case study: targeted metabolite detection using TARDIS in cardiovascular disease</a></li>
-    <li><a class="dropdown-item" href="../articles/gui_tutorial.html">Targeted peak integration of LC-MS data using T.A.R.D.I.S.</a></li>
+    <li><a class="dropdown-item" href="../articles/gui_tutorial.html">Targeted peak integration of LC-MS data using TARDIS</a></li>
     <li><a class="dropdown-item" href="../articles/quick_start.html">Quick start for targeted peak integration of LC-MS data using TARDIS</a></li>
   </ul>
 </li>
@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Pablo
 Vangeenderhuysen</h4>
             
-            <h4 data-toc-skip class="date">2025-10-23</h4>
+            <h4 data-toc-skip class="date">2025-10-24</h4>
       
 
       <div class="d-none name"><code>quick_start.Rmd</code></div>
@@ -85,6 +85,15 @@ for installation instructions.</p>
 functionalities of <code>TARDIS</code> using the command line interface.
 For details on the GUI we refer to the <code>gui_tutorial</code>
 vignette. For more information we refer to the publication : <a href="https://pubs.acs.org/doi/10.1021/acs.analchem.5c00567" class="external-link uri">https://pubs.acs.org/doi/10.1021/acs.analchem.5c00567</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="file-conversion">File conversion<a class="anchor" aria-label="anchor" href="#file-conversion"></a>
+</h2>
+<p>Input files need to be converted to the .mzML format and have to be
+centroided. Polarity filtering is done within <code>TARDIS</code>, so no
+polarity subsetting has to be performed when converting the files. For
+file conversion using MSConvert (ProteoWizard) we refer to to mzmine
+documentation: <a href="https://mzmine.github.io/mzmine_documentation/data_conversion.html" class="external-link uri">https://mzmine.github.io/mzmine_documentation/data_conversion.html</a></p>
 </div>
 <div class="section level2">
 <h2 id="loading-data">Loading data<a class="anchor" aria-label="anchor" href="#loading-data"></a>
@@ -279,8 +288,8 @@ distinguish QC from sample runs.</p>
 <h2 id="data-with-multiple-scan-windows">Data with multiple scan windows<a class="anchor" aria-label="anchor" href="#data-with-multiple-scan-windows"></a>
 </h2>
 <p><strong>IMPORTANT!</strong> if your data contains multiple
-(overlapping) <em>m/z</em> scan windows, it is nescessary to analyze
-these seperatly through the “mass_range” argument. If not, you will
+(overlapping) <em>m/z</em> scan windows, it is necessary to analyze
+these separately through the “mass_range” argument. If not, you will
 notice that peaks will have a sawtooth profile, because of the filtering
 of empty spectra within TARDIS.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
