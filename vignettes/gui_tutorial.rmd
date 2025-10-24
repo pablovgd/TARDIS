@@ -1,5 +1,5 @@
 ---
-title: "Targeted peak integration of LC-MS data using T.A.R.D.I.S."
+title: "Targeted peak integration of LC-MS data using TARDIS"
 author: "Pablo Vangeenderhuysen"
 date: "`r Sys.Date()`"
 output: 
@@ -8,7 +8,7 @@ output:
     toc_float: true
 
 vignette: >
-  %\VignetteIndexEntry{Targeted peak integration of LC-MS data using T.A.R.D.I.S.}
+  %\VignetteIndexEntry{Targeted peak integration of LC-MS data using TARDIS}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   
@@ -24,8 +24,8 @@ library(TARDIS)
 
 # Introduction
 
-`T.A.R.D.I.S.` is an R package developed by Pablo Vangeenderhuysen at
-LIMET, Ghent University. `T.A.R.D.I.S.` offers an easy and
+`TARDIS` is an R package developed by Pablo Vangeenderhuysen at
+LIMET, Ghent University. `TARDIS` offers an easy and
 straightforward way to automatically calculate area under the peak, max
 intensity and various quality metrics for targeted chemical compounds in
 LC-MS data. It makes use of an established retention time correction
@@ -33,16 +33,23 @@ algorithm from the `xcms` package and loads MS data as `Spectra`
 objects so it's easily integrated with other tools of the
 *Rformassspectrometry* initiative.
 
-See [README](https://github.com/pablovgd/T.A.R.D.I.S./blob/main/README.md) for installation instructions.
+See [README](https://github.com/pablovgd/TARDIS/blob/main/README.md) for installation instructions.
 
-This tutorial explains the basic functionality of `T.A.R.D.I.S.` and how
-to use the Shiny GUI. It's advised to read this tutorial until the end before using `T.A.R.D.I.S.` to understand how the tool works and what kind of input is needed.
+This tutorial explains the basic functionality of `TARDIS` and how
+to use the Shiny GUI. It's advised to read this tutorial until the end before using `TARDIS` to understand how the tool works and what kind of input is needed.
 
-# Targeted data processing with T.A.R.D.I.S.
+# Targeted data processing with TARDIS
+
+## File conversion
+
+Input files need to be converted to the .mzML format and have to be centroided.
+Polarity filtering is done within `TARDIS`, so no polarity subsetting has to be
+performed when converting the files. For file conversion using MSConvert (ProteoWizard)
+we refer to to mzmine documentation: https://mzmine.github.io/mzmine_documentation/data_conversion.html
 
 ## The general workflow
 
-`T.A.R.D.I.S.` was developed as an open-source alternative for targeted
+`TARDIS` was developed as an open-source alternative for targeted
 peak integration using simple and interpretable algorithms. It's general
 workflow is as follows: 
 
@@ -66,7 +73,7 @@ compound:
 * A column that indicates the polarity of the formed ion for that compound
 
 Extra columns can be included in the file, but will be ignored by
-`T.A.R.D.I.S.` unless otherwise indicated.
+`TARDIS` unless otherwise indicated.
 
 An input file (either .xlsx or .csv) can be converted to a correct
 data.frame using the `createTargetList()` function (not needed if using
@@ -165,7 +172,7 @@ This behavior should be visible after running screening mode, if QCs from beginn
 To deal with a different expected RT per batch, target compounds are first integrated in the QCs from that batch, after which expected RT is adjusted to the RT at which the compounds are retrieved (or almost retrieved) in the QCs. In the next step, all runs (QCs and samples) in that batch are processed with the adjusted RT.
 
 An example: in the Figures below, the compound is clearly eluting at a different time in QC runs at the beginning of the analysis (left), compared to QC runs at the end of the analysis (right).
-In order to avoid having to manually provide expected RT for every batch, `T.A.R.D.I.S.` will detect that the peak apex is now closer to a RT of 440 seconds (7.3 minutes) and thus when finally processing that batch the expected RT for that compound will be approximately 440 seconds instead of 446 seconds. 
+In order to avoid having to manually provide expected RT for every batch, `TARDIS` will detect that the peak apex is now closer to a RT of 440 seconds (7.3 minutes) and thus when finally processing that batch the expected RT for that compound will be approximately 440 seconds instead of 446 seconds. 
 
 ```{r echo=FALSE, rtshift, fig.show='hold', out.width="45%"}
 
@@ -320,7 +327,7 @@ knitr::include_graphics("vignette_data/screenshots/processing_done.png")
 
 # Issues and feature requests
 
-`T.A.R.D.I.S.` will receive periodical updates including improvements and/or new features based on the need of the users. If you encounter an error, or any other problem, feel free to create an issue on Github. Got an idea yourself to improve `T.A.R.D.I.S.`? Feature requests are also more than welcome. 
+`TARDIS` will receive periodical updates including improvements and/or new features based on the need of the users. If you encounter an error, or any other problem, feel free to create an issue on Github. Got an idea yourself to improve `TARDIS`? Feature requests are also more than welcome. 
 
-https://github.com/pablovgd/T.A.R.D.I.S./issues
+https://github.com/pablovgd/TARDIS/issues
 
