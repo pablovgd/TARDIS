@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Pablo
 Vangeenderhuysen</h4>
             
-            <h4 data-toc-skip class="date">2025-10-24</h4>
+            <h4 data-toc-skip class="date">2025-11-04</h4>
       
 
       <div class="d-none name"><code>quick_start.Rmd</code></div>
@@ -175,14 +175,13 @@ contains the ionization mode and the other columns of interest.</p>
 function, check the help page: <code><a href="../reference/createTargetList.html">?createTargetList</a></code></p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pablovgd.github.io/TARDIS/">TARDIS</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by</span></span>
-<span><span class="co">#&gt; 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'</span></span>
 <span><span class="va">targets</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createTargetList.html">createTargetList</a></span><span class="op">(</span><span class="st">"vignette_data/targets.xlsx"</span>,</span>
-<span>                            pos_pattern <span class="op">=</span> <span class="st">"+"</span>,</span>
-<span>                            neg_pattern <span class="op">=</span> <span class="st">"-"</span>,</span>
-<span>                            polarity <span class="op">=</span> <span class="st">"positive"</span>,</span>
-<span>                            ion_column <span class="op">=</span> <span class="st">"ion"</span>,</span>
-<span>                            columns_of_interest <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"name"</span>, <span class="st">"mz"</span>, <span class="st">"rt"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    pos_pattern <span class="op">=</span> <span class="st">"+"</span>,</span>
+<span>    neg_pattern <span class="op">=</span> <span class="st">"-"</span>,</span>
+<span>    polarity <span class="op">=</span> <span class="st">"positive"</span>,</span>
+<span>    ion_column <span class="op">=</span> <span class="st">"ion"</span>,</span>
+<span>    columns_of_interest <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"name"</span>, <span class="st">"mz"</span>, <span class="st">"rt"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">targets</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -258,9 +257,10 @@ distinguish QC from sample runs.</p>
 <code>type</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/RforMassSpectrometry/MsExperiment" class="external-link">MsExperiment</a></span><span class="op">)</span></span>
-<span><span class="va">files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"vignette_data/mzML/"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"vignette_data/mzML/"</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">ms_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MsExperiment/man/readMsExperiment.html" class="external-link">readMsExperiment</a></span><span class="op">(</span><span class="va">files</span>,</span>
-<span>                            backend <span class="op">=</span> <span class="fu">Spectra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Spectra/man/MsBackend.html" class="external-link">MsBackendMzR</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>    backend <span class="op">=</span> <span class="fu">Spectra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Spectra/man/MsBackend.html" class="external-link">MsBackendMzR</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ms_data</span></span>
 <span><span class="co">#&gt; Object of class MsExperiment </span></span>
@@ -269,20 +269,22 @@ distinguish QC from sample runs.</p>
 <span><span class="co">#&gt;  Sample data links:</span></span>
 <span><span class="co">#&gt;   - spectra: 14 sample(s) to 15625 element(s).</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/MsExperiment/man/MsExperiment.html" class="external-link">sampleData</a></span><span class="op">(</span><span class="va">ms_data</span><span class="op">)</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"QC"</span>,</span>
-<span>              <span class="st">"QC"</span>,</span>
-<span>              <span class="st">"sample"</span>,</span>
-<span>              <span class="st">"sample"</span>,</span>
-<span>              <span class="st">"sample"</span>,</span>
-<span>              <span class="st">"sample"</span>,</span>
-<span>              <span class="st">"QC"</span>,</span>
-<span>              <span class="st">"QC"</span>,</span>
-<span>              <span class="st">"sample"</span>,</span>
-<span>              <span class="st">"sample"</span>,</span>
-<span>              <span class="st">"sample"</span>,</span>
-<span>              <span class="st">"sample"</span>,</span>
-<span>              <span class="st">"QC"</span>,</span>
-<span>              <span class="st">"QC"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/MsExperiment/man/MsExperiment.html" class="external-link">sampleData</a></span><span class="op">(</span><span class="va">ms_data</span><span class="op">)</span><span class="op">$</span><span class="va">type</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"QC"</span>,</span>
+<span>    <span class="st">"QC"</span>,</span>
+<span>    <span class="st">"sample"</span>,</span>
+<span>    <span class="st">"sample"</span>,</span>
+<span>    <span class="st">"sample"</span>,</span>
+<span>    <span class="st">"sample"</span>,</span>
+<span>    <span class="st">"QC"</span>,</span>
+<span>    <span class="st">"QC"</span>,</span>
+<span>    <span class="st">"sample"</span>,</span>
+<span>    <span class="st">"sample"</span>,</span>
+<span>    <span class="st">"sample"</span>,</span>
+<span>    <span class="st">"sample"</span>,</span>
+<span>    <span class="st">"QC"</span>,</span>
+<span>    <span class="st">"QC"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="data-with-multiple-scan-windows">Data with multiple scan windows<a class="anchor" aria-label="anchor" href="#data-with-multiple-scan-windows"></a>
@@ -304,53 +306,60 @@ visible within our <em>m/z</em> and RT windows.</p>
 <p>I limited the selection to 10 targets: 5 internal standards and 5
 endogenous metabolites.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">targets</span> <span class="op">=</span> <span class="va">targets</span><span class="op">[</span><span class="va">targets</span><span class="op">$</span><span class="va">ID</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1576"</span>,<span class="st">"1577"</span>,<span class="st">"1578"</span>,<span class="st">"1583"</span>,<span class="st">"331"</span>,</span>
-<span>                            <span class="st">"7"</span>,<span class="st">"9"</span>,<span class="st">"131"</span>,<span class="st">"179"</span>,<span class="st">"183"</span><span class="op">)</span>,<span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">targets</span> <span class="op">&lt;-</span> <span class="va">targets</span><span class="op">[</span><span class="va">targets</span><span class="op">$</span><span class="va">ID</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"1576"</span>, <span class="st">"1577"</span>, <span class="st">"1578"</span>, <span class="st">"1583"</span>, <span class="st">"331"</span>,</span>
+<span>    <span class="st">"7"</span>, <span class="st">"9"</span>, <span class="st">"131"</span>, <span class="st">"179"</span>, <span class="st">"183"</span></span>
+<span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
 <p>We can run screening mode using the argument
 <code>screening_mode = TRUE</code> in the tardis_peaks function.</p>
 <p>For more details on the inputs of the function, please read the help
 page <code><a href="../reference/tardisPeaks.html">?tardisPeaks</a></code></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tardisPeaks.html">tardisPeaks</a></span><span class="op">(</span>file_path <span class="op">=</span> <span class="st">"vignette_data/mzML/"</span>,</span>
-<span>                        dbData <span class="op">=</span> <span class="va">targets</span>,</span>
-<span>                        mass_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                        polarity <span class="op">=</span> <span class="st">"positive"</span>,</span>
-<span>                        output_directory <span class="op">=</span> <span class="st">"vignette_data/output/screening/"</span>,</span>
-<span>                        batch_positions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">14</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                        QC_pattern <span class="op">=</span> <span class="st">"QC"</span>,</span>
-<span>                        int_std_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1576"</span>,<span class="st">"1577"</span>,<span class="st">"1578"</span>,<span class="st">"1583"</span>,<span class="st">"331"</span><span class="op">)</span>,</span>
-<span>                        screening_mode <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Performing retention time correction using 5 peak groups.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tardisPeaks.html">tardisPeaks</a></span><span class="op">(</span></span>
+<span>    file_path <span class="op">=</span> <span class="st">"vignette_data/mzML/"</span>,</span>
+<span>    dbData <span class="op">=</span> <span class="va">targets</span>,</span>
+<span>    mass_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    polarity <span class="op">=</span> <span class="st">"positive"</span>,</span>
+<span>    output_directory <span class="op">=</span> <span class="st">"vignette_data/output/screening/"</span>,</span>
+<span>    batch_positions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    QC_pattern <span class="op">=</span> <span class="st">"QC"</span>,</span>
+<span>    int_std_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1576"</span>, <span class="st">"1577"</span>, <span class="st">"1578"</span>, <span class="st">"1583"</span>, <span class="st">"331"</span><span class="op">)</span>,</span>
+<span>    screening_mode <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Performing retention time alignment using 5 anchor peaks.</span></span></code></pre></div>
 <p>Or, as mentioned, the MsExperiment object can be used as input
 instead.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tardisPeaks.html">tardisPeaks</a></span><span class="op">(</span> lcmsData <span class="op">=</span> <span class="va">ms_data</span>, </span>
-<span>                        dbData <span class="op">=</span> <span class="va">targets</span>,</span>
-<span>                        mass_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                        polarity <span class="op">=</span> <span class="st">"positive"</span>,</span>
-<span>                        output_directory <span class="op">=</span> <span class="st">"vignette_data/output/screening/"</span>,</span>
-<span>                        batch_positions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">14</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                        QC_pattern <span class="op">=</span> <span class="st">"QC"</span>,</span>
-<span>                        int_std_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1576"</span>,<span class="st">"1577"</span>,<span class="st">"1578"</span>,<span class="st">"1583"</span>,<span class="st">"331"</span><span class="op">)</span>,</span>
-<span>                        screening_mode <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Performing retention time correction using 5 peak groups.</span></span>
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tardisPeaks.html">tardisPeaks</a></span><span class="op">(</span></span>
+<span>    lcmsData <span class="op">=</span> <span class="va">ms_data</span>,</span>
+<span>    dbData <span class="op">=</span> <span class="va">targets</span>,</span>
+<span>    mass_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    polarity <span class="op">=</span> <span class="st">"positive"</span>,</span>
+<span>    output_directory <span class="op">=</span> <span class="st">"vignette_data/output/screening/"</span>,</span>
+<span>    batch_positions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    QC_pattern <span class="op">=</span> <span class="st">"QC"</span>,</span>
+<span>    int_std_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1576"</span>, <span class="st">"1577"</span>, <span class="st">"1578"</span>, <span class="st">"1583"</span>, <span class="st">"331"</span><span class="op">)</span>,</span>
+<span>    screening_mode <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Performing retention time alignment using 5 anchor peaks.</span></span>
 <span><span class="co">#&gt; Warning in .adjustRtime_peakGroupsMatrix(rt_raw, peakGroupsMatrix(param), :</span></span>
 <span><span class="co">#&gt; Span too small for 'loess' and the available number of peak groups, resetting</span></span>
 <span><span class="co">#&gt; to 0.8</span></span></code></pre></div>
 <p>The resulting EICs are saved in the output folder and can be
 inspected:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_7.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_9.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_131.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_179.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_183.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_331.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1576.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1577.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1578.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1583.png"</span></span>
-<span>                         <span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_7.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_9.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_131.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_179.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_183.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_331.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1576.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1577.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1578.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1583.png"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_7.png" width="49%"><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_9.png" width="49%"><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_131.png" width="49%"><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_179.png" width="49%"><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_183.png" width="49%"><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_331.png" width="49%"><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1576.png" width="49%"><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1577.png" width="49%"><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1578.png" width="49%"><img src="vignette_data/output/screening/Diagnostic_QCs_Batch_1/Component_1583.png" width="49%"></p>
 <p>Based on the EICs we can see that detection and integration were
 successful, however,targets 1577 and 1583 are eluting towards the edge
@@ -366,16 +375,18 @@ times to the ones were we see the peaks eluting.</p>
 <p>Now we can perform peak detection in all our runs by setting
 <code>screening_mode =  FALSE</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tardisPeaks.html">tardisPeaks</a></span><span class="op">(</span>lcmsData <span class="op">=</span> <span class="va">ms_data</span>,</span>
-<span>                        dbData <span class="op">=</span> <span class="va">targets</span>,</span>
-<span>                        mass_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                        polarity <span class="op">=</span> <span class="st">"positive"</span>,</span>
-<span>                        output_directory <span class="op">=</span> <span class="st">"vignette_data/output/"</span>,</span>
-<span>                        batch_positions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">14</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                        QC_pattern <span class="op">=</span> <span class="st">"QC"</span>,</span>
-<span>                        int_std_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1576"</span>,<span class="st">"1577"</span>,<span class="st">"1578"</span>,<span class="st">"1583"</span>,<span class="st">"331"</span><span class="op">)</span>,</span>
-<span>                        screening_mode <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Performing retention time correction using 5 peak groups.</span></span>
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tardisPeaks.html">tardisPeaks</a></span><span class="op">(</span></span>
+<span>    lcmsData <span class="op">=</span> <span class="va">ms_data</span>,</span>
+<span>    dbData <span class="op">=</span> <span class="va">targets</span>,</span>
+<span>    mass_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    polarity <span class="op">=</span> <span class="st">"positive"</span>,</span>
+<span>    output_directory <span class="op">=</span> <span class="st">"vignette_data/output/"</span>,</span>
+<span>    batch_positions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    QC_pattern <span class="op">=</span> <span class="st">"QC"</span>,</span>
+<span>    int_std_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1576"</span>, <span class="st">"1577"</span>, <span class="st">"1578"</span>, <span class="st">"1583"</span>, <span class="st">"331"</span><span class="op">)</span>,</span>
+<span>    screening_mode <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Performing retention time alignment using 5 anchor peaks.</span></span>
 <span><span class="co">#&gt; Aligning sample number 3 against subset ... OK</span></span>
 <span><span class="co">#&gt; Aligning sample number 4 against subset ... OK</span></span>
 <span><span class="co">#&gt; Aligning sample number 5 against subset ... OK</span></span>
@@ -391,17 +402,18 @@ times to the ones were we see the peaks eluting.</p>
 <p>The resulting EICs are again saved in the output folder and can be
 inspected:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_7.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_9.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_131.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_179.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_183.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_331.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_1576.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_1577.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_1578.png"</span>,</span>
-<span>                         <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_1583.png"</span></span>
-<span>                         <span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_7.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_9.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_131.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_179.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_183.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_331.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_1576.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_1577.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_1578.png"</span>,</span>
+<span>    <span class="st">"vignette_data/output/Diagnostic_QCs_Batch_1/Component_1583.png"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_7.png" width="49%"><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_9.png" width="49%"><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_131.png" width="49%"><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_179.png" width="49%"><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_183.png" width="49%"><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_331.png" width="49%"><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_1576.png" width="49%"><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_1577.png" width="49%"><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_1578.png" width="49%"><img src="vignette_data/output/Diagnostic_QCs_Batch_1/Component_1583.png" width="49%"></p>
 <p>The <code>results</code> object is a <code>list</code> that contains
 a <code>data.frame</code> with the AUC of each target in each run and a
@@ -687,10 +699,10 @@ metrics for each target in the QC runs.</p>
 peak_cor and points over the peak) and are saved into the output
 folder.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">maxint</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"vignette_data/output/int_table.csv"</span>,check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">SNR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"vignette_data/output/snr_table.csv"</span>,check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">peak_cor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"vignette_data/output/peakcor_table.csv"</span>,check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"vignette_data/output/pop_table.csv"</span>,check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">maxint</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"vignette_data/output/int_table.csv"</span>, check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">SNR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"vignette_data/output/snr_table.csv"</span>, check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">peak_cor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"vignette_data/output/peakcor_table.csv"</span>, check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"vignette_data/output/pop_table.csv"</span>, check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table style="width:100%;" class="table">
